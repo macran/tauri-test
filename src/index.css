@@ -1,0 +1,669 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/noto-sans-sc";
+
+@custom-variant dark (&:is(.dark *));
+
+
+
+:root {
+  --font-sans: "HarmonyOS Sans", "Microsoft YaHei UI", "Segoe UI", "Noto Sans SC Variable",
+    "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "Geist Variable", ui-monospace, "JetBrains Mono", monospace;
+  /* 统一控件高度（28px，桌面密度）：input / select / combobox / 日期 / 默认按钮都用它 */
+  --control-h: 1.75rem;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* shadcn bridge -  color-*  CSS  */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-field-border: var(--field-border);
+  --color-field-border-hover: var(--field-border-hover);
+  --color-field-bg: var(--field-bg);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+
+  /* radius  */
+  --radius-sm: calc(var(--radius) * 0.55);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.9);
+  --radius-3xl: calc(var(--radius) * 2.4);
+  --radius-4xl: calc(var(--radius) * 3);
+
+}
+
+/* ----------------------------------------------------------------------------
+   LIGHT MODE - Warm Pearl
+   +
+   ---------------------------------------------------------------------------- */
+:root {
+  /* -- shadcn  token -- */
+  --background:           oklch(0.960 0.010 245);   /* #f2f4f8  */
+  --foreground:           oklch(0.185 0.040 248);   /* #1a2a42  */
+  --card:                 oklch(0.995 0.004 245 / 85%);
+  --card-foreground:      oklch(0.185 0.040 248);
+  --popover:              oklch(0.995 0.004 245 / 95%);
+  --popover-foreground:   oklch(0.185 0.040 248);
+  --primary:              oklch(0.430 0.175 254);   /* #2d4fad  */
+  --primary-foreground:   oklch(1 0 0);
+  --secondary:            oklch(0.925 0.018 245);
+  --secondary-foreground: oklch(0.280 0.080 248);
+  --muted:                oklch(0.930 0.014 245);
+  --muted-foreground:     oklch(0.500 0.055 248);
+  --accent:               var(--primary);   /* 菜单/下拉高亮：与主色一致 */
+  --accent-foreground:    var(--primary-foreground);
+  --destructive:          oklch(0.570 0.230 28);
+  --border:               oklch(0.868 0.020 245 / 65%);
+  --input:                oklch(0.990 0.005 245 / 75%);
+  --ring:                 oklch(0.430 0.175 254);
+  /* -- 输入框边框：默认灰 → hover 加深 → focus 主色 -- */
+  --field-border:        oklch(0.800 0.020 250);
+  --field-border-hover:  oklch(0.620 0.040 250);
+  --field-bg:            oklch(1 0 0);
+  --chart-1:              oklch(0.430 0.175 254);   /*  */
+  --chart-2:              oklch(0.480 0.130 175);   /*  */
+  --chart-3:              oklch(0.620 0.155 55);    /*  */
+  --chart-4:              oklch(0.560 0.160 285);   /*  */
+  --chart-5:              oklch(0.580 0.210 28);    /*  */
+  --radius:               0.325rem;                 /* 10px */
+
+  /* Sidebar token(shadcn sidebar ) */
+  --sidebar:              oklch(0.250 0.075 252);   /*  */
+  --sidebar-foreground:   oklch(1 0 0);
+  --sidebar-primary:      oklch(0.430 0.175 254);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent:       oklch(0.320 0.080 252);
+  --sidebar-accent-foreground: oklch(0.940 0.012 245);
+  --sidebar-border:       oklch(0.320 0.065 252);
+  --sidebar-ring:         oklch(0.580 0.145 55);    /*  ring */
+
+  /* -- App  -- */
+  --app-bg:   #eef1f8;
+  --app-bg-2: #e5eaf5;
+
+  /*  -  */
+  --orb-1: radial-gradient(ellipse at 72% 8%,  rgba(45, 79, 173, 0.10) 0%, transparent 55%);
+  --orb-2: radial-gradient(ellipse at 12% 88%, rgba(15, 118, 110, 0.07) 0%, transparent 52%);
+  --orb-3: radial-gradient(ellipse at 48% 52%, rgba(80, 120, 220, 0.06) 0%, transparent 65%);
+
+  /* --  - (12px) -- */
+  --glass-bg:          rgba(255, 255, 255, 0.90);
+  --glass-bg-strong:   rgba(255, 255, 255, 0.97);
+  --glass-border:      rgba(210, 225, 250, 0.80);
+  --glass-border-subtle: rgba(210, 225, 250, 0.55);
+  --glass-shadow:      0 2px 12px rgba(30, 50, 100, 0.08), 0 1px 3px rgba(30, 50, 100, 0.05);
+  --glass-shadow-hover: 0 6px 24px rgba(30, 50, 100, 0.13), 0 2px 6px rgba(30, 50, 100, 0.08);
+  --glass-shadow-lg:   0 12px 40px rgba(20, 40, 90, 0.14), 0 4px 12px rgba(20, 40, 90, 0.08);
+  --glass-blur:        blur(6px) saturate(1.2);     /*  */
+  --glass-blur-strong: blur(8px) saturate(1.3);
+
+  /* --  -  -- */
+  --sidebar-bg:           transparent;
+  --sidebar-border-color: var(--card-border);
+  --sidebar-active-bg:    var(--blue-primary);
+  --sidebar-active-text:  #ffffff;
+  --sidebar-active-border: var(--blue-primary);
+  --sidebar-active-glow:  0 4px 12px color-mix(in oklch, var(--blue-primary) 35%, transparent);
+  --sidebar-text:         var(--text-secondary);
+  --sidebar-text-hover:   var(--text-primary);
+
+  /* --  -- */
+  --titlebar-bg:     rgba(250, 252, 255, 0.96);
+  --titlebar-border: rgba(210, 225, 250, 0.80);
+
+  /* --  -- */
+  --card-bg:          rgba(255, 255, 255, 0.94);
+  --card-border:      rgba(210, 225, 250, 0.65);
+  --card-shadow:      var(--glass-shadow);
+  --card-shadow-hover: var(--glass-shadow-hover);
+
+  /* --  -- */
+  --input-bg:          rgba(255, 255, 255, 0.95);
+  --input-border:      rgba(180, 205, 240, 0.80);
+  --input-focus-ring:  #2d4fad;
+  --input-text:        #1a2a42;
+  --input-placeholder: #7488a3;
+
+  /* -- Tab  -- */
+  --tabbar-bg:       rgba(245, 248, 253, 0.96);
+  --tabbar-border:   rgba(210, 225, 250, 0.70);
+  --tab-active-bg:   rgba(255, 255, 255, 0.98);
+  --tab-active-text: #16294d;
+  --tab-inactive-text: #4a6488;
+  --segment-active-bg: rgba(255, 255, 255, 0.72);
+
+  /* --  -- */
+  --blue-primary: #2d4fad;        /*  */
+  --blue-light:   #5b8ef0;        /* / */
+  --blue-pale:    rgba(45, 79, 173, 0.09);
+  --blue-pale-2:  rgba(45, 79, 173, 0.15);
+
+  /* --  -- */
+  --table-header-bg:    rgba(232, 238, 252, 0.96);
+  --table-header-text:  #33455f;
+  --table-row-hover:    rgba(45, 79, 173, 0.06);
+  --table-border:       rgba(195, 215, 240, 0.65);
+
+  /* --  -- */
+  --text-primary:   #0f1e33;
+  --text-secondary: #22344c;
+  --text-muted:     #55688a;
+  --text-faint:     #7c93b3;
+
+  /* --  blob -- */
+  --blob-1: rgba(45, 79, 173, 0.10);
+  --blob-2: rgba(15, 118, 110, 0.07);
+  --blob-3: rgba(91, 142, 240, 0.06);
+
+  /* --  -- */
+  --accent-green:      #0f9e72;   /*  */
+  --accent-green-bg:   rgba(15, 158, 114, 0.10);
+  --accent-amber:      #c08000;   /* () */
+  --accent-amber-bg:   rgba(192, 128, 0, 0.10);
+  --accent-red:        #d92b2b;   /*  */
+  --accent-red-bg:     rgba(217, 43, 43, 0.09);
+  --accent-violet:     #6d3bb8;   /*  */
+  --accent-violet-bg:  rgba(109, 59, 184, 0.10);
+  --accent-teal:       #0f766e;
+  --accent-teal-bg:    rgba(15, 118, 110, 0.10);
+
+  /* --  -- */
+  --scrollbar-track: rgba(220, 230, 248, 0.40);
+  --scrollbar-thumb: rgb(139, 139, 139);
+  --scrollbar-thumb-hover: rgb(39, 39, 39);
+}
+
+/* ----------------------------------------------------------------------------
+   DARK MODE - Deep Indigo
+    #0d1829()
+   ---------------------------------------------------------------------------- */
+.dark {
+  /* -- shadcn  token -- */
+  --background:           oklch(0.135 0.030 248);   /* #0d1829  */
+  --foreground:           oklch(0.888 0.018 245);
+  --card:                 oklch(0.185 0.035 248 / 72%);
+  --card-foreground:      oklch(0.888 0.018 245);
+  --popover:              oklch(0.185 0.035 248 / 90%);
+  --popover-foreground:   oklch(0.888 0.018 245);
+  --primary:              oklch(0.620 0.175 254);   /*  */
+  --primary-foreground:   oklch(0.090 0.025 248);
+  --secondary:            oklch(0.220 0.042 248);
+  --secondary-foreground: oklch(0.820 0.022 245);
+  --muted:                oklch(0.210 0.038 248);
+  --muted-foreground:     oklch(0.570 0.052 245);
+  --accent:               var(--primary);
+  --accent-foreground:    var(--primary-foreground);
+  --destructive:          oklch(0.660 0.210 22);
+  --border:               oklch(1 0 0 / 9%);
+  --input:                oklch(1 0 0 / 9%);
+  --ring:                 oklch(0.620 0.175 254);
+  /* -- 输入框边框 -- */
+  --field-border:        oklch(1 0 0 / 18%);
+  --field-border-hover:  oklch(1 0 0 / 34%);
+  --field-bg:            oklch(1 0 0 / 6%);
+  --chart-1:              oklch(0.620 0.175 254);
+  --chart-2:              oklch(0.560 0.130 175);
+  --chart-3:              oklch(0.680 0.155 55);
+  --chart-4:              oklch(0.640 0.165 285);
+  --chart-5:              oklch(0.660 0.210 22);
+  --sidebar:              oklch(0.155 0.038 250);
+  --sidebar-foreground:   oklch(0.820 0.022 245);
+  --sidebar-primary:      oklch(0.620 0.175 254);
+  --sidebar-primary-foreground: oklch(0.090 0.025 248);
+  --sidebar-accent:       oklch(0.240 0.052 250);
+  --sidebar-accent-foreground: oklch(0.888 0.018 245);
+  --sidebar-border:       oklch(0.260 0.048 250);
+  --sidebar-ring:         oklch(0.680 0.150 55);
+
+  /* -- App  -- */
+  --app-bg:   #0d1829;
+  --app-bg-2: #0f1c30;
+
+  /*  */
+  --orb-1: radial-gradient(ellipse at 72% 6%,  rgba(60, 100, 220, 0.18) 0%, transparent 50%);
+  --orb-2: radial-gradient(ellipse at 10% 90%, rgba(15, 118, 110, 0.12) 0%, transparent 50%);
+  --orb-3: radial-gradient(ellipse at 46% 52%, rgba(45, 79, 173, 0.09) 0%, transparent 62%);
+
+  /* --  -- */
+  --glass-bg:           rgba(255, 255, 255, 0.055);
+  --glass-bg-strong:    rgba(255, 255, 255, 0.090);
+  --glass-border:       rgba(255, 255, 255, 0.120);
+  --glass-border-subtle: rgba(255, 255, 255, 0.070);
+  --glass-shadow:       0 4px 20px rgba(0, 0, 0, 0.40), 0 1px 4px rgba(0, 0, 0, 0.28);
+  --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.52), 0 2px 8px rgba(0, 0, 0, 0.32);
+  --glass-shadow-lg:    0 20px 56px rgba(0, 0, 0, 0.58), 0 4px 14px rgba(0, 0, 0, 0.38);
+  --glass-blur:         blur(6px) saturate(1.3);
+  --glass-blur-strong:  blur(10px) saturate(1.4);
+
+  /* --  -- */
+  --sidebar-bg:           transparent;
+  --sidebar-border-color: var(--card-border);
+  --sidebar-active-bg:    var(--blue-primary);
+  --sidebar-active-text:  #ffffff;
+  --sidebar-active-border: var(--blue-primary);
+  --sidebar-active-glow:  0 4px 14px color-mix(in oklch, var(--blue-primary) 45%, transparent);
+  --sidebar-text:         #3a5878;
+  --sidebar-text-hover:   #90b4e0;
+
+  /* --  -- */
+  --titlebar-bg:     rgba(13, 24, 41, 0.94);
+  --titlebar-border: rgba(255, 255, 255, 0.090);
+
+  /* --  -- */
+  --card-bg:          rgba(20, 32, 52, 0.92);
+  --card-border:      rgba(255, 255, 255, 0.100);
+  --card-shadow:      var(--glass-shadow);
+  --card-shadow-hover: var(--glass-shadow-hover);
+
+  /* --  -- */
+  --input-bg:          rgba(255, 255, 255, 0.065);
+  --input-border:      rgba(255, 255, 255, 0.135);
+  --input-focus-ring:  #5b8ef0;
+  --input-text:        #dce8fb;
+  --input-placeholder: #5c7492;
+
+  /* -- Tab  -- */
+  --tabbar-bg:        rgba(13, 24, 41, 0.94);
+  --tabbar-border:    rgba(255, 255, 255, 0.085);
+  --tab-active-bg:    rgba(255, 255, 255, 0.095);
+  --tab-active-text:  #c8ddff;
+  --tab-inactive-text: #7891b3;
+  --segment-active-bg: rgba(255, 255, 255, 0.10);
+
+  /* --  -- */
+  --blue-primary: #5b8ef0;
+  --blue-light:   #8ab8ff;
+  --blue-pale:    rgba(91, 142, 240, 0.13);
+  --blue-pale-2:  rgba(91, 142, 240, 0.20);
+
+  /* --  -- */
+  --table-header-bg:    rgba(255, 255, 255, 0.045);
+  --table-header-text:  #9fb7d4;
+  --table-row-hover:    rgba(91, 142, 240, 0.09);
+  --table-border:       rgba(255, 255, 255, 0.075);
+
+  /* --  -- */
+  --text-primary:   #e6eefc;
+  --text-secondary: #b0c4de;
+  --text-muted:     #82a0c4;
+  --text-faint:     #5c7492;
+
+  /* --  blob -- */
+  --blob-1: rgba(60, 100, 220, 0.14);
+  --blob-2: rgba(15, 118, 110, 0.09);
+  --blob-3: rgba(45, 79, 173, 0.07);
+
+  /* --  -- */
+  --accent-green:      #34c78a;
+  --accent-green-bg:   rgba(52, 199, 138, 0.12);
+  --accent-amber:      #e8a920;
+  --accent-amber-bg:   rgba(232, 169, 32, 0.12);
+  --accent-red:        #f06060;
+  --accent-red-bg:     rgba(240, 96, 96, 0.12);
+  --accent-violet:     #b08ae8;
+  --accent-violet-bg:  rgba(176, 138, 232, 0.12);
+  --accent-teal:       #2dd4bf;
+  --accent-teal-bg:    rgba(45, 212, 191, 0.11);
+
+  /* --  -- */
+  --scrollbar-track: rgba(255, 255, 255, 0.03);
+  --scrollbar-thumb: rgb(139, 139, 139);
+  --scrollbar-thumb-hover: rgb(190, 205, 230);
+
+  /* native <select> popup (the options list) is rendered by the browser/OS and
+     ignores most CSS - color-scheme plus explicit bg/color on <option> is what
+     actually gets Chromium/Firefox to draw a dark popup instead of white.
+     Applied globally so every raw <select> in the app gets it, not just one page. */
+  select {
+    color-scheme: dark;
+
+    option {
+      background-color: #182338;
+      color: #e2e8f0;
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   BASE STYLES
+   ---------------------------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background-color: var(--app-bg);
+    text-rendering: optimizeLegibility;
+    /*  +  */
+    font-feature-settings: "tnum" 1, "kern" 1, "liga" 1;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  html {
+    @apply font-sans;
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  /*  */
+  td, th, .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*  */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.5;
+    filter: invert(0.5);
+    cursor: pointer;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   GLASS COMPONENT UTILITIES
+    AppShell / DashboardContent / CustomTitleBar  inline style 
+   ---------------------------------------------------------------------------- */
+
+/*  */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* AppButton 变体（统一：同高 --control-h、同圆角、同一套动效）
+   次要 = 半透明描边；重点 = 纯主题色（Fluent 式实心强调，无渐变）；危险 = 破坏色。
+   动效：hover 微抬 + 阴影加深，按下回弹缩 0.98；全部 150ms，减少动效偏好下关闭位移。 */
+.btn-glass, .btn-brand, .btn-danger {
+  transition: background-color 150ms ease, box-shadow 150ms ease, transform 120ms cubic-bezier(0.2, 0, 0, 1), border-color 150ms ease;
+}
+.btn-glass:hover:not(:disabled), .btn-brand:hover:not(:disabled), .btn-danger:hover:not(:disabled) { transform: translateY(-1px); }
+.btn-glass:active:not(:disabled), .btn-brand:active:not(:disabled), .btn-danger:active:not(:disabled) { transform: scale(0.98); }
+@media (prefers-reduced-motion: reduce) {
+  .btn-glass, .btn-brand, .btn-danger { transition: background-color 150ms ease, box-shadow 150ms ease; }
+  .btn-glass:hover:not(:disabled), .btn-brand:hover:not(:disabled), .btn-danger:hover:not(:disabled),
+  .btn-glass:active:not(:disabled), .btn-brand:active:not(:disabled), .btn-danger:active:not(:disabled) { transform: none; }
+}
+
+.btn-glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+}
+.btn-glass:hover:not(:disabled) { background: var(--glass-bg-strong); box-shadow: var(--glass-shadow); }
+
+.btn-brand {
+  background: var(--blue-primary);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--blue-primary) 35%, transparent);
+}
+.btn-brand:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--blue-primary) 88%, white);
+  box-shadow: 0 4px 14px color-mix(in oklch, var(--blue-primary) 40%, transparent);
+}
+
+.btn-danger {
+  background: var(--accent-red);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--accent-red) 35%, transparent);
+}
+.btn-danger:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--accent-red) 88%, white);
+  box-shadow: 0 4px 14px color-mix(in oklch, var(--accent-red) 40%, transparent);
+}
+
+.glass-panel-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* (DashboardContent glassCard  class ) */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.glass-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--glass-border);
+}
+
+/* ( absolute ) */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.26), transparent);
+  pointer-events: none;
+}
+
+/* ( DashboardContent glassInput / liquid-ui LiquidInput) */
+.glass-input {
+  background: var(--input-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--input-border);
+  color: var(--input-text);
+  border-radius: 8px;
+  font-size: 13px;
+  padding: 6px 12px;
+  outline: none;
+  width: 100%;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.glass-input::placeholder {
+  color: var(--input-placeholder);
+}
+
+.glass-input:focus {
+  border-color: var(--input-focus-ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--input-focus-ring) 18%, transparent);
+}
+
+/* ----------------------------------------------------------------------------
+   STATUS BADGES
+   DashboardContent  badge-matched / badge-error / badge-parsing / badge-pending
+   ---------------------------------------------------------------------------- */
+
+.badge-matched {
+  background: var(--accent-green-bg);
+  color: var(--accent-green);
+}
+
+.badge-error {
+  background: var(--accent-red-bg);
+  color: var(--accent-red);
+}
+
+.badge-pending {
+  background: var(--accent-amber-bg);
+  color: var(--accent-amber);
+}
+
+.badge-parsing {
+  background: var(--blue-pale-2);
+  color: var(--blue-light);
+}
+
+/* ----------------------------------------------------------------------------
+   SCROLLBARS
+   ---------------------------------------------------------------------------- */
+
+/* (hide-scrollbarAppShell  / Tab ) */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 全局滚动条（Windows 11 风格）：
+   无轨道槽（轨道透明）；滑块 = 圆角胶囊，悬停加深；两端各一个微调按钮（箭头），
+   点一下滚动一小段，按住连续滚动。thin-scrollbar / table-scrollbar 只改粗细，结构相同。
+   微调按钮用 background-image 画箭头（WebKit 滚动条按钮只支持这种方式）。 */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* 微调按钮：12px 方块，箭头居中。WebKit 滚动条按钮只能用 background-image 画箭头，
+   所以浅色 / 深色各写一套 SVG（颜色取 text-muted / text-primary 同色系）。 */
+::-webkit-scrollbar-button:single-button {
+  display: block;
+  width: 12px;
+  height: 12px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 8px 8px;
+  /* 透明边 + padding-box：按钮底色比箭头区域小一圈，悬停时是一块圆角小方块而不是满格色块 */
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-button:single-button:hover { background-color: var(--blue-pale); }
+::-webkit-scrollbar-button:single-button:active { background-color: var(--blue-pale-2); }
+::-webkit-scrollbar-button:vertical:start:decrement { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 6 4 2.5 7 6' fill='none' stroke='%239aa8c0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+::-webkit-scrollbar-button:vertical:start:decrement:hover { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 6 4 2.5 7 6' fill='none' stroke='%231e2d50' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+::-webkit-scrollbar-button:vertical:end:increment { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 2 4 5.5 7 2' fill='none' stroke='%239aa8c0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+::-webkit-scrollbar-button:vertical:end:increment:hover { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 2 4 5.5 7 2' fill='none' stroke='%231e2d50' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+::-webkit-scrollbar-button:horizontal:start:decrement { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M6 1 2.5 4 6 7' fill='none' stroke='%239aa8c0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+::-webkit-scrollbar-button:horizontal:start:decrement:hover { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M6 1 2.5 4 6 7' fill='none' stroke='%231e2d50' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+::-webkit-scrollbar-button:horizontal:end:increment { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M2 1 5.5 4 2 7' fill='none' stroke='%239aa8c0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+::-webkit-scrollbar-button:horizontal:end:increment:hover { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M2 1 5.5 4 2 7' fill='none' stroke='%231e2d50' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.dark ::-webkit-scrollbar-button:vertical:start:decrement { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 6 4 2.5 7 6' fill='none' stroke='%235c7492' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.dark ::-webkit-scrollbar-button:vertical:start:decrement:hover { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 6 4 2.5 7 6' fill='none' stroke='%23d2e1fa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.dark ::-webkit-scrollbar-button:vertical:end:increment { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 2 4 5.5 7 2' fill='none' stroke='%235c7492' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.dark ::-webkit-scrollbar-button:vertical:end:increment:hover { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 2 4 5.5 7 2' fill='none' stroke='%23d2e1fa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.dark ::-webkit-scrollbar-button:horizontal:start:decrement { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M6 1 2.5 4 6 7' fill='none' stroke='%235c7492' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.dark ::-webkit-scrollbar-button:horizontal:start:decrement:hover { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M6 1 2.5 4 6 7' fill='none' stroke='%23d2e1fa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.dark ::-webkit-scrollbar-button:horizontal:end:increment { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M2 1 5.5 4 2 7' fill='none' stroke='%235c7492' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.dark ::-webkit-scrollbar-button:horizontal:end:increment:hover { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M2 1 5.5 4 2 7' fill='none' stroke='%23d2e1fa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+/* 另一端（start 的 increment、end 的 decrement）不放按钮，避免每端出现两个 */
+::-webkit-scrollbar-button:start:increment,
+::-webkit-scrollbar-button:end:decrement {
+  display: none;
+}
+
+/* thin / table 变体沿用同一结构，只是比全局略窄，微调按钮随之缩小 */
+.thin-scrollbar::-webkit-scrollbar,
+.table-scrollbar::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+[data-slot="win11-calendar"],
+[data-slot="win11-date-picker"] {
+  --w11-field-border: var(--field-border);
+  --w11-field-border-hover: var(--field-border-hover);
+  --w11-field-bg: var(--field-bg);
+  --w11-accent: var(--blue-primary);
+  --w11-accent-fg: #fff;
+}
+
+/* 日期 / 月份 / 年份面板（弹层在 portal 里，不在上面的容器内，单独定义）：
+   面板比白色输入框略深一档，标题栏再深一档，形成 输入框 > 面板 > 标题栏 的层次 */
+[data-slot="win11-date-picker-panel"] {
+  --w11-panel-bg: oklch(0.955 0.016 245);
+  --w11-panel-head-bg: oklch(0.925 0.024 245);
+}
+.dark [data-slot="win11-date-picker-panel"] {
+  --w11-panel-bg: oklch(0.215 0.040 248);
+  --w11-panel-head-bg: oklch(0.255 0.048 250);
+}
+
+.dark [data-slot="win11-calendar"],
+.dark [data-slot="win11-date-picker"] {
+  --w11-accent: var(--accent-amber);
+  --w11-accent-fg: #1a1a1a;
+}
+
+/* 不确定进度条：宽度 1/3 的滑块在轨道内往返（轨道宽 = 3 份，translate 200% 即贴到右端） */
+@keyframes progress-slide {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(200%);
+  }
+}

@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>进项发票管理 · 界面原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 三层递进：墨 → 纸灰 → 白 */
+  --ink:#151b26;
+  --ink-2:#1d2533;
+  --ink-3:#2a3444;
+  --paper:#eceef1;
+  --paper-2:#e2e5ea;
+  --white:#ffffff;
+  --line:#d6dae0;
+  --line-soft:#e8eaee;
+  /* 主色：墨青。红色全程保留给「红冲 / 异常 / 负数」——这是中国会计语境里红色的本义 */
+  --accent:#0d6b76;
+  --accent-soft:#e3f1f2;
+  --accent-line:#9ec7cb;
+  --danger:#b3261e;
+  --danger-soft:#fbeceb;
+  --warn:#8a5a00;
+  --warn-soft:#fdf3e2;
+  --ok:#1a6b43;
+  --text:#1a2230;
+  --text-2:#5b6676;
+  --text-3:#8b95a3;
+  --text-on-ink:#e8ecf2;
+  --text-on-ink-2:#8d99ab;
+  --row-h:30px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:Inter,"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+  font-size:13px;color:var(--text);background:var(--paper-2);
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.num{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;text-align:right}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+/* ───────── 外壳 ───────── */
+.app{display:flex;height:100vh;width:100vw}
+
+/* ───────── 第 1 层：主 sidebar（墨色） ───────── */
+.nav{
+  width:214px;flex:0 0 214px;background:var(--ink);
+  display:flex;flex-direction:column;transition:width .18s ease;
+}
+.nav.collapsed{width:52px}
+.nav-head{
+  height:46px;display:flex;align-items:center;gap:9px;padding:0 14px;
+  border-bottom:1px solid rgba(255,255,255,.07);flex:0 0 46px;
+}
+.nav-mark{
+  width:22px;height:22px;flex:0 0 22px;border-radius:4px;
+  background:var(--accent);color:#fff;display:grid;place-items:center;
+  font-size:11px;font-weight:700;letter-spacing:-.5px;
+}
+.nav-title{font-size:12.5px;font-weight:600;color:var(--text-on-ink);white-space:nowrap}
+.nav-sub{font-size:10px;color:var(--text-on-ink-2);white-space:nowrap}
+.nav-body{flex:1;overflow-y:auto;padding:10px 0}
+.nav-group{
+  font-size:10px;font-weight:600;letter-spacing:.11em;color:#5d6a7d;
+  padding:14px 14px 6px;text-transform:none;user-select:none;
+}
+.nav-group:first-child{padding-top:2px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:0 14px;height:31px;color:#aab4c2;font-size:12.5px;
+  border-left:2px solid transparent;white-space:nowrap;
+}
+.nav-item:hover{background:rgba(255,255,255,.045);color:var(--text-on-ink)}
+.nav-item.on{
+  background:rgba(13,107,118,.2);color:#fff;font-weight:500;
+  border-left-color:var(--accent);
+}
+.nav-ico{width:15px;flex:0 0 15px;text-align:center;font-size:12px;opacity:.85}
+.nav.collapsed .nav-title,.nav.collapsed .nav-sub,
+.nav.collapsed .nav-group,.nav.collapsed .nav-label{display:none}
+.nav-foot{
+  padding:8px;border-top:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;gap:8px;
+}
+.nav-foot button{
+  color:#8d99ab;font-size:11px;display:flex;align-items:center;gap:6px;
+  padding:5px 7px;border-radius:4px;width:100%;
+}
+.nav-foot button:hover{background:rgba(255,255,255,.05);color:#fff}
+
+/* ───────── 主区 ───────── */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--white)}
+
+/* 文档 tab：卡片式、带 ×，和页内切换器形态刻意不同 */
+.tabbar{
+  height:36px;flex:0 0 36px;background:var(--paper-2);
+  display:flex;align-items:flex-end;padding:0 8px;gap:2px;
+  border-bottom:1px solid var(--line);overflow-x:auto;
+}
+.tab{
+  display:flex;align-items:center;gap:8px;height:29px;padding:0 10px 0 12px;
+  background:#dadee4;color:var(--text-2);font-size:12px;
+  border-radius:5px 5px 0 0;max-width:230px;white-space:nowrap;
+}
+.tab:hover{background:#e4e7ec}
+.tab.on{background:var(--white);color:var(--text);font-weight:500;height:31px}
+.tab .x{
+  width:15px;height:15px;border-radius:3px;display:grid;place-items:center;
+  font-size:13px;line-height:1;color:var(--text-3);flex:0 0 15px;
+}
+.tab .x:hover{background:rgba(0,0,0,.09);color:var(--text)}
+.tab-dim{color:var(--text-3);font-weight:400}
+
+.stage{flex:1;min-height:0;display:flex}
+
+/* ───────── 第 2 层：采集模块的数据源列（纸灰） ───────── */
+.srcs{
+  width:236px;flex:0 0 236px;background:var(--paper);
+  border-right:1px solid var(--line);display:flex;flex-direction:column;
+}
+.srcs-head{
+  padding:11px 14px 9px;display:flex;align-items:baseline;justify-content:space-between;
+}
+.srcs-head h3{font-size:12px;font-weight:600}
+.period-pill{
+  font-size:10.5px;color:var(--text-2);background:#fff;
+  border:1px solid var(--line);border-radius:3px;padding:2px 6px;
+}
+.srcs-list{flex:1;overflow-y:auto;padding:0 8px 10px}
+/* 无图标、靠缩进与右侧数字建立结构 —— 与主 sidebar 区别明显 */
+.src{
+  display:block;width:100%;text-align:left;padding:7px 10px;
+  border-radius:5px;margin-bottom:1px;
+}
+.src:hover{background:rgba(0,0,0,.045)}
+.src.on{background:#fff;box-shadow:0 1px 2px rgba(20,30,50,.08)}
+.src-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.src-name{font-size:12.5px;font-weight:500}
+.src.on .src-name{color:var(--accent)}
+.src-meta{display:flex;align-items:center;gap:6px;margin-top:3px}
+.src-note{font-size:10.5px;color:var(--text-3)}
+.badge{
+  font-size:10px;padding:1px 5px;border-radius:3px;font-weight:500;
+  white-space:nowrap;
+}
+.b-ok{background:#e4f1ea;color:var(--ok)}
+.b-miss{background:var(--warn-soft);color:var(--warn)}
+.b-err{background:var(--danger-soft);color:var(--danger)}
+.b-none{background:#e6e8ec;color:var(--text-3)}
+.srcs-foot{
+  padding:9px 14px;border-top:1px solid var(--line);
+  font-size:10.5px;color:var(--text-3);line-height:1.5;
+}
+
+/* ───────── 内容面（白） ───────── */
+.pane{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--white)}
+.pane-head{padding:16px 22px 13px;border-bottom:1px solid var(--line-soft)}
+.pane-head h2{font-size:17px;font-weight:600;letter-spacing:-.2px}
+.pane-head p{font-size:12px;color:var(--text-2);margin-top:4px;max-width:620px;line-height:1.55}
+.pane-body{flex:1;overflow-y:auto;padding:18px 22px 40px}
+
+/* 上传区 */
+.drop{
+  border:1.5px dashed var(--line);border-radius:7px;background:#fafbfc;
+  padding:26px;text-align:center;
+}
+.drop.has{border-style:solid;background:#fff;text-align:left;display:flex;align-items:center;gap:12px}
+.drop-ico{font-size:21px;opacity:.5}
+.drop-main{font-size:13px;font-weight:500}
+.drop-sub{font-size:11.5px;color:var(--text-3);margin-top:3px}
+.drop-grow{flex:1;min-width:0}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;height:29px;padding:0 13px;
+  border-radius:5px;font-size:12.5px;font-weight:500;border:1px solid var(--line);
+  background:#fff;white-space:nowrap;
+}
+.btn:hover{background:#f4f6f8}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:#0a5a63}
+.btn-ghost{border-color:transparent;background:transparent;color:var(--text-2)}
+.btn-ghost:hover{background:#f1f3f5;color:var(--text)}
+.btn-sm{height:25px;padding:0 9px;font-size:11.5px}
+
+/* 区块 */
+.block{margin-top:22px}
+.block-head{
+  display:flex;align-items:baseline;gap:10px;padding-bottom:7px;
+  border-bottom:1px solid var(--line-soft);margin-bottom:11px;
+}
+.block-head h4{font-size:12px;font-weight:600}
+.block-head .when{font-size:11px;color:var(--text-3)}
+.block-head .sp{flex:1}
+
+/* sheet 结果表 */
+.sheets{width:100%;border-collapse:collapse;font-size:12.5px}
+.sheets td{padding:6px 0;border-bottom:1px solid var(--line-soft)}
+.sheets tr:last-child td{border-bottom:0}
+.sheets .s-name{font-weight:500}
+.sheets .s-n{width:96px}
+.sheets .s-st{width:190px;color:var(--text-2);font-size:12px}
+
+/* 结果横幅 */
+.banner{
+  display:flex;gap:11px;padding:12px 14px;border-radius:6px;
+  border:1px solid;align-items:flex-start;
+}
+.banner.ok{background:#f0f7f3;border-color:#c3e0d1}
+.banner.bad{background:var(--danger-soft);border-color:#eec9c6}
+.banner-ico{font-size:15px;line-height:1.3}
+.banner h5{font-size:12.5px;font-weight:600;margin-bottom:3px}
+.banner p{font-size:11.5px;color:var(--text-2);line-height:1.55}
+.banner .acts{margin-top:9px;display:flex;gap:7px}
+
+/* 错误清单 */
+.errs{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.errs-bar{
+  display:flex;align-items:center;gap:9px;padding:7px 11px;
+  background:#fafbfc;border-bottom:1px solid var(--line);font-size:11.5px;
+}
+.errs-bar strong{color:var(--danger);font-weight:600}
+.err-grp{
+  padding:6px 11px;background:#f6f7f9;font-size:11px;font-weight:600;
+  color:var(--text-2);border-bottom:1px solid var(--line-soft);
+}
+.err{
+  display:grid;grid-template-columns:62px 92px 1fr;gap:10px;
+  padding:6px 11px;border-bottom:1px solid var(--line-soft);font-size:11.5px;
+  align-items:baseline;
+}
+.err:last-child{border-bottom:0}
+.err-row{color:var(--text-3)}
+.err-field{color:var(--text-2);font-weight:500}
+.err-msg{line-height:1.5}
+.err-msg b{color:var(--danger);font-weight:500}
+.err-more{
+  padding:6px 11px;font-size:11.5px;color:var(--accent);
+  background:#fafbfc;width:100%;text-align:left;
+}
+.err-more:hover{text-decoration:underline}
+
+/* 导入历史 */
+.hist{width:100%;border-collapse:collapse;font-size:12px}
+.hist td{padding:6px 10px 6px 0;border-bottom:1px solid var(--line-soft);color:var(--text-2)}
+.hist tr:last-child td{border-bottom:0}
+.hist .h-st{width:18px}
+.hist .h-when{width:112px}
+
+/* ───────── 查询模块：单 sidebar + 全宽表格 ───────── */
+.q{flex:1;min-width:0;display:flex;flex-direction:column}
+/* 页内切换器：下划线/胶囊式，与顶部卡片 tab 不会混淆 */
+.q-switch{
+  display:flex;align-items:center;gap:9px;padding:9px 16px;
+  border-bottom:1px solid var(--line-soft);
+}
+.q-switch .lb{font-size:11.5px;color:var(--text-3)}
+.sel{position:relative}
+.sel-btn{
+  display:flex;align-items:center;gap:8px;height:28px;padding:0 10px;
+  border:1px solid var(--line);border-radius:5px;background:#fff;
+  font-size:12.5px;font-weight:500;min-width:170px;
+}
+.sel-btn:hover{border-color:var(--accent-line)}
+.sel-btn .caret{margin-left:auto;color:var(--text-3);font-size:9px}
+.sel-menu{
+  position:absolute;top:33px;left:0;min-width:290px;background:#fff;
+  border:1px solid var(--line);border-radius:6px;z-index:40;padding:4px;
+  box-shadow:0 8px 26px rgba(20,30,50,.14);display:none;
+}
+.sel-menu.open{display:block}
+.sel-opt{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:6px 9px;border-radius:4px;font-size:12.5px;
+}
+.sel-opt:hover{background:#f2f4f6}
+.sel-opt.on{background:var(--accent-soft);color:var(--accent);font-weight:500}
+.sel-opt .c{margin-left:auto;font-size:11.5px;color:var(--text-3)}
+.sel-opt.on .c{color:var(--accent)}
+.sel-opt .c.zero{color:var(--text-3);opacity:.6}
+
+/* 筛选栏 */
+.fbar{padding:11px 16px;background:#fafbfc;border-bottom:1px solid var(--line)}
+.fields{display:flex;flex-wrap:wrap;gap:13px 16px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10.5px;color:var(--text-2);font-weight:500}
+.field input,.field .fake{
+  height:27px;border:1px solid var(--line);border-radius:4px;background:#fff;
+  padding:0 8px;font-size:12px;min-width:132px;display:flex;align-items:center;
+  color:var(--text);font-family:inherit;
+}
+.field input::placeholder{color:#b6bdc7}
+.field .fake{justify-content:space-between;gap:8px;cursor:pointer}
+.field .fake span.v{font-weight:500}
+.fbar-acts{display:flex;align-items:center;gap:7px;margin-top:11px}
+.fbar-acts .sp{flex:1}
+.count{font-size:12px;color:var(--text-2)}
+.count b{color:var(--text);font-weight:600}
+
+/* 数据表格 */
+.tw{flex:1;min-height:0;overflow:auto;position:relative}
+table.dt{border-collapse:separate;border-spacing:0;font-size:12px;width:max-content;min-width:100%}
+table.dt th{
+  position:sticky;top:0;z-index:20;background:#f4f6f8;text-align:left;
+  font-size:11px;font-weight:600;color:var(--text-2);white-space:nowrap;
+  padding:0 10px;height:30px;border-bottom:1px solid var(--line);
+  border-right:1px solid var(--line-soft);
+}
+table.dt td{
+  padding:0 10px;height:var(--row-h);white-space:nowrap;
+  border-bottom:1px solid var(--line-soft);border-right:1px solid #f2f4f6;
+  color:var(--text);
+}
+table.dt tbody tr:hover td{background:#f7fafb}
+table.dt tbody tr.on td{background:var(--accent-soft)}
+th.stick,td.stick{position:sticky;z-index:21;background:#fff}
+th.stick{z-index:25;background:#f4f6f8}
+tbody tr:hover td.stick{background:#f7fafb}
+tbody tr.on td.stick{background:var(--accent-soft)}
+.s1{left:0}
+.s2{left:142px;box-shadow:1px 0 0 var(--line)}
+th.s2{box-shadow:1px 0 0 var(--line)}
+.r{text-align:right}
+.neg{color:var(--danger)}
+.chip{
+  font-size:10px;padding:1px 5px;border-radius:3px;background:#eef0f3;
+  color:var(--text-2);
+}
+.chip.red{background:var(--danger-soft);color:var(--danger)}
+
+/* 分页 */
+.pager{
+  flex:0 0 38px;display:flex;align-items:center;gap:12px;padding:0 16px;
+  border-top:1px solid var(--line);background:#fafbfc;font-size:11.5px;
+  color:var(--text-2);
+}
+.pager .sp{flex:1}
+.pg{display:flex;gap:2px;align-items:center}
+.pg button{
+  min-width:25px;height:25px;border-radius:4px;font-size:11.5px;padding:0 6px;
+  color:var(--text-2);
+}
+.pg button:hover{background:#eceef1}
+.pg button.on{background:var(--accent);color:#fff;font-weight:600}
+.pg .gap{color:var(--text-3);padding:0 3px}
+
+/* 行详情侧板 */
+.detail{
+  width:296px;flex:0 0 296px;border-left:1px solid var(--line);
+  background:#fcfcfd;display:flex;flex-direction:column;
+}
+.detail-head{
+  padding:12px 14px;border-bottom:1px solid var(--line-soft);
+  display:flex;align-items:flex-start;gap:8px;
+}
+.detail-head h4{font-size:12.5px;font-weight:600}
+.detail-head p{font-size:11px;color:var(--text-3);margin-top:2px}
+.detail-body{flex:1;overflow-y:auto;padding:4px 14px 14px}
+.dsec{
+  font-size:10px;font-weight:600;letter-spacing:.09em;color:var(--text-3);
+  padding:13px 0 5px;
+}
+.drow{
+  display:grid;grid-template-columns:84px 1fr;gap:10px;
+  padding:4px 0;font-size:11.5px;border-bottom:1px solid #f1f3f5;
+}
+.drow dt{color:var(--text-3)}
+.drow dd{font-weight:500;word-break:break-all}
+.detail-foot{
+  padding:9px 14px;border-top:1px solid var(--line-soft);display:flex;gap:7px;
+}
+.detail-foot .btn{flex:1;justify-content:center}
+
+/* 说明条 */
+.note{
+  position:fixed;bottom:0;left:0;right:0;z-index:60;
+  background:var(--ink-2);color:#c6cfdb;font-size:11px;
+  padding:7px 14px;display:flex;align-items:center;gap:10px;
+}
+.note b{color:#fff;font-weight:600}
+.note .sp{flex:1}
+.note button{color:#8d99ab;font-size:11px}
+.note button:hover{color:#fff}
+body.noted .app{height:calc(100vh - 31px)}
+
+@media (max-width:1180px){
+  .detail{display:none}
+  .srcs{width:200px;flex:0 0 200px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body class="noted">
+
+<div class="app">
+  <!-- ══ 第 1 层：主 sidebar ══ -->
+  <nav class="nav" id="nav">
+    <div class="nav-head">
+      <div class="nav-mark">进</div>
+      <div>
+        <div class="nav-title">进项发票管理</div>
+        <div class="nav-sub">2026-10 期间</div>
+      </div>
+    </div>
+    <div class="nav-body" id="navBody"></div>
+    <div class="nav-foot">
+      <button onclick="toggleNav()"><span class="nav-ico">⇤</span><span class="nav-label">收起侧栏</span></button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="tabbar" id="tabbar"></div>
+    <div class="stage" id="stage"></div>
+  </div>
+</div>
+
+<div class="note">
+  <b>界面原型</b>
+  <span id="noteText">左侧切换模块，看两种布局的差别</span>
+  <span class="sp"></span>
+  <button onclick="document.body.classList.remove('noted');this.parentElement.remove()">关闭 ×</button>
+</div>
+
+<script>
+/* ════════ 导航结构 ════════ */
+const NAV = [
+  { group:'数据采集', items:[
+    { key:'imp-tax',     ico:'⬇', label:'税务数据导入' },
+    { key:'imp-voucher', ico:'⬇', label:'凭证数据导入' },
+  ]},
+  { group:'数据查询', items:[
+    { key:'q-invoice',  ico:'▦', label:'发票数据' },
+    { key:'q-industry', ico:'▦', label:'特定行业' },
+    { key:'q-cert',     ico:'▦', label:'认证清单' },
+    { key:'q-voucher',  ico:'▦', label:'凭证数据' },
+  ]},
+  { group:'进项税管理', items:[
+    { key:'m-redflush', ico:'↺', label:'红冲匹配' },
+    { key:'m-transfer', ico:'↗', label:'进项税转出' },
+    { key:'m-stamp',    ico:'❏', label:'印花税' },
+  ]},
+  { group:'综合查询', items:[
+    { key:'q-all', ico:'⌕', label:'发票明细全景' },
+  ]},
+];
+
+/* ════════ 采集模块数据 ════════ */
+const IMPORTS = {
+  'imp-tax':{
+    title:'税务数据导入',
+    srcs:[
+      { key:'invoices', name:'全量发票', note:'多工作表 · 10-13 15:04', badge:['b-err','校验未通过'],
+        desc:'从电子税务局下载的「全量发票」Excel，一次导入自动写入发票头、发票明细与 7 张特定行业明细表。',
+        file:'2026年10月全量发票.xlsx  ·  4.2 MB',
+        sheets:[
+          ['发票头','1,204','解析通过'],
+          ['发票明细','12,480','3 条校验失败'],
+          ['机动车销售','1,204','解析通过'],
+          ['农产品收购','892','12 条警告'],
+          ['货物运输服务','2,301','解析通过'],
+          ['建筑服务','145','解析通过'],
+          ['不动产经营租赁','12','解析通过'],
+          ['旅客运输服务','438','解析通过'],
+          ['二手车销售','36','解析通过'],
+        ],
+        state:'bad',
+        errs:[
+          { grp:'发票明细 · 3 条校验失败', rows:[
+            ['行 847','税额','税额 <b>1,560.00</b> 与 金额 × 税率 <b>1,440.00</b> 不符'],
+            ['行 1203','税率','值「<b>0.13%</b>」无法识别，应为 13% 或 0.13'],
+            ['行 5582','发票号码','为空'],
+          ]},
+          { grp:'农产品收购 · 12 条警告（不影响导入）', rows:[
+            ['行 8','收购凭证号','长度 14 位，标准为 16 位'],
+            ['行 9–19','收购凭证号','同上，共 11 条'],
+          ]},
+        ],
+        hist:[
+          ['⛔','10-13 15:04','2026-10','校验失败，未写入'],
+          ['✓','10-12 14:22','2026-10','12,480 条 · 张三'],
+          ['✓','09-30 09:10','2026-09','11,902 条 · 张三'],
+        ],
+        fields:[]
+      },
+      { key:'cert', name:'认证清单', note:'单工作表 · 10-12 14:25', badge:['b-ok','本期已导入'],
+        desc:'勾选认证平台导出的认证清单，单工作表，写入认证清单表。',
+        file:'2026年10月认证清单.xlsx  ·  640 KB',
+        sheets:[['认证清单','1,180','全部写入']],
+        state:'ok',
+        errs:[],
+        hist:[
+          ['✓','10-12 14:25','2026-10','1,180 条 · 张三'],
+          ['✓','09-29 16:40','2026-09','1,097 条 · 李四'],
+        ],
+        fields:[]
+      },
+    ]
+  },
+  'imp-voucher':{
+    title:'凭证数据导入',
+    srcs:[
+      { key:'payable', name:'应付凭证', note:'10-12 14:22', badge:['b-ok','本期已导入'],
+        desc:'财务系统导出的应付明细凭证。导入时需登记接收日期与文件提供者，用于数据溯源。',
+        file:'应付凭证_202610.xlsx  ·  1.1 MB',
+        sheets:[['应付凭证','8,420','全部写入']],
+        state:'ok', errs:[],
+        hist:[['✓','10-12 14:22','2026-10','8,420 条 · 王五']],
+        fields:[['接收日期','2026-10-12'],['文件提供者','王五']]
+      },
+      { key:'related', name:'关联方凭证', note:'10-12 14:25', badge:['b-ok','本期已导入'],
+        desc:'关联交易往来凭证，导入时需登记接收日期与文件提供者。',
+        file:'关联方凭证_202610.xlsx  ·  210 KB',
+        sheets:[['关联方凭证','1,205','全部写入']],
+        state:'ok', errs:[],
+        hist:[['✓','10-12 14:25','2026-10','1,205 条 · 王五']],
+        fields:[['接收日期','2026-10-12'],['文件提供者','王五']]
+      },
+      { key:'bank', name:'银行费用凭证', note:'上次 2026-09 期间', badge:['b-miss','本期未导入'],
+        desc:'银行手续费类凭证。本期尚未导入，期末印花税与转出计算会缺少该部分数据。',
+        file:null,
+        sheets:[], state:'empty', errs:[],
+        hist:[['✓','09-30 09:10','2026-09','842 条 · 赵六']],
+        fields:[['接收日期',''],['文件提供者','']]
+      },
+      { key:'travel', name:'差旅费用凭证', note:'从未导入', badge:['b-none','无记录'],
+        desc:'差旅报销相关凭证。尚无任何导入记录。',
+        file:null,
+        sheets:[], state:'empty', errs:[],
+        hist:[],
+        fields:[['接收日期',''],['文件提供者','']]
+      },
+    ]
+  }
+};
+
+/* ════════ 查询模块数据 ════════ */
+const money = n => n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+const T_DETAIL = {
+  key:'detail', label:'发票明细', count:12480,
+  cols:[
+    {f:'invoice_no',h:'发票号码',w:142,stick:'s1'},
+    {f:'line_no',h:'行号',w:52,stick:'s2',r:1},
+    {f:'goods_name',h:'货物或应税劳务名称',w:188},
+    {f:'spec',h:'规格型号',w:104},
+    {f:'unit',h:'单位',w:54},
+    {f:'qty',h:'数量',w:72,r:1},
+    {f:'price',h:'单价',w:92,r:1},
+    {f:'amount',h:'金额',w:100,r:1,money:1},
+    {f:'tax_rate',h:'税率',w:62,r:1},
+    {f:'tax_amount',h:'税额',w:94,r:1,money:1},
+    {f:'seller',h:'销方名称',w:186},
+    {f:'seller_tax_no',h:'销方税号',w:158},
+    {f:'invoice_date',h:'开票日期',w:94},
+    {f:'goods_code',h:'商品编码',w:132},
+    {f:'invoice_type',h:'发票类型',w:116},
+    {f:'period',h:'所属期间',w:84},
+  ],
+  filters:[
+    {label:'所属期间',type:'fake',v:'2026-10'},
+    {label:'发票号码',type:'text',ph:'精确或前缀匹配'},
+    {label:'货物名称',type:'text',ph:'模糊匹配'},
+    {label:'销方名称',type:'text',ph:'模糊匹配'},
+    {label:'税率',type:'fake',v:'全部'},
+  ],
+  rows:[
+    ['24101000001',1,'热轧卷板 Q235B','Q235B 3.0×1250','吨',12,1000,12000,'13%',1560,'某某钢铁贸易有限公司','91310000MA1K2X3Y4Z','2026-10-08','3101','增值税专用发票','2026-10'],
+    ['24101000001',2,'运输服务费','—','次',1,1200,1200,'9%',108,'某某钢铁贸易有限公司','91310000MA1K2X3Y4Z','2026-10-08','3040','增值税专用发票','2026-10'],
+    ['24101000002',1,'办公用纸 A4','70g 500张/包','箱',5,160,800,'13%',104,'某某办公用品有限公司','91310000MA2B3C4D5E','2026-10-09','1070','增值税专用发票','2026-10'],
+    ['24101000003',1,'小型载货汽车','NJ1041','辆',1,128000,128000,'13%',16640,'某某汽车销售服务公司','91310000MA3E4F5G6H','2026-10-09','1090','机动车销售统一发票','2026-10'],
+    ['24101000004',1,'鲜活农产品 玉米','统货','吨',40,2400,96000,'免税',0,'某某农业合作社','91310000MA4H5I6J7K','2026-10-10','1010','农产品收购发票','2026-10'],
+    ['24101000005',1,'建筑安装工程款','—','项',1,450000,450000,'9%',40500,'某某建筑工程有限公司','91310000MA5K6L7M8N','2026-10-10','3050','增值税专用发票','2026-10'],
+    ['24101000006',1,'厂房租金 10月','—','月',1,86000,86000,'9%',7740,'某某置业管理有限公司','91310000MA6N7O8P9Q','2026-10-11','3060','增值税专用发票','2026-10'],
+    ['24101000007',1,'国内旅客运输服务','—','人次',8,860,6880,'9%',619.2,'某某航空服务有限公司','91310000MA7Q8R9S0T','2026-10-11','3070','电子普通发票','2026-10'],
+    ['24101000008',1,'二手叉车','合力 CPD30','台',1,42000,42000,'13%',5460,'某某二手设备经营部','91310000MA8T9U0V1W','2026-10-12','1095','二手车销售统一发票','2026-10'],
+    ['24101000009',1,'电力费用 10月','—','度',120000,0.68,81600,'13%',10608,'某某供电服务有限公司','91310000MA9W0X1Y2Z','2026-10-12','1040','增值税专用发票','2026-10'],
+    ['24101000010',1,'冷轧板卷','SPCC 1.0×1000','吨',-8,1100,-8800,'13%',-1144,'某某钢铁贸易有限公司','91310000MA1K2X3Y4Z','2026-10-12','3101','红字增值税专用发票','2026-10'],
+    ['24101000011',1,'劳保手套','丁腈 中号','副',600,4.2,2520,'13%',327.6,'某某劳保用品有限公司','91310000MB1A2B3C4D','2026-10-13','1080','增值税专用发票','2026-10'],
+  ]
+};
+
+const T_HEADER = {
+  key:'header', label:'发票头', count:1204,
+  cols:[
+    {f:'invoice_no',h:'发票号码',w:142,stick:'s1'},
+    {f:'invoice_code',h:'发票代码',w:118,stick:'s2'},
+    {f:'invoice_date',h:'开票日期',w:98},
+    {f:'seller',h:'销方名称',w:206},
+    {f:'seller_tax_no',h:'销方税号',w:162},
+    {f:'amount',h:'不含税金额',w:112,r:1,money:1},
+    {f:'tax',h:'税额',w:100,r:1,money:1},
+    {f:'total',h:'价税合计',w:112,r:1,money:1},
+    {f:'invoice_type',h:'发票类型',w:150},
+    {f:'status',h:'发票状态',w:86},
+    {f:'lines',h:'明细行数',w:82,r:1},
+    {f:'period',h:'所属期间',w:84},
+  ],
+  filters:[
+    {label:'所属期间',type:'fake',v:'2026-10'},
+    {label:'发票号码',type:'text',ph:'精确或前缀匹配'},
+    {label:'销方名称',type:'text',ph:'模糊匹配'},
+    {label:'销方税号',type:'text',ph:'精确匹配'},
+    {label:'发票状态',type:'fake',v:'全部'},
+  ],
+  rows:[
+    ['24101000001','3100264140','2026-10-08','某某钢铁贸易有限公司','91310000MA1K2X3Y4Z',13200,1668,14868,'增值税专用发票','正常',2,'2026-10'],
+    ['24101000002','3100264140','2026-10-09','某某办公用品有限公司','91310000MA2B3C4D5E',800,104,904,'增值税专用发票','正常',1,'2026-10'],
+    ['24101000003','3100264141','2026-10-09','某某汽车销售服务公司','91310000MA3E4F5G6H',128000,16640,144640,'机动车销售统一发票','正常',1,'2026-10'],
+    ['24101000004','3100264141','2026-10-10','某某农业合作社','91310000MA4H5I6J7K',96000,0,96000,'农产品收购发票','正常',1,'2026-10'],
+    ['24101000005','3100264142','2026-10-10','某某建筑工程有限公司','91310000MA5K6L7M8N',450000,40500,490500,'增值税专用发票','正常',1,'2026-10'],
+    ['24101000006','3100264142','2026-10-11','某某置业管理有限公司','91310000MA6N7O8P9Q',86000,7740,93740,'增值税专用发票','正常',1,'2026-10'],
+    ['24101000007','3100264143','2026-10-11','某某航空服务有限公司','91310000MA7Q8R9S0T',6880,619.2,7499.2,'电子普通发票','正常',1,'2026-10'],
+    ['24101000008','3100264143','2026-10-12','某某二手设备经营部','91310000MA8T9U0V1W',42000,5460,47460,'二手车销售统一发票','正常',1,'2026-10'],
+    ['24101000009','3100264144','2026-10-12','某某供电服务有限公司','91310000MA9W0X1Y2Z',81600,10608,92208,'增值税专用发票','正常',1,'2026-10'],
+    ['24101000010','3100264144','2026-10-12','某某钢铁贸易有限公司','91310000MA1K2X3Y4Z',-8800,-1144,-9944,'红字增值税专用发票','已红冲',1,'2026-10'],
+    ['24101000011','3100264145','2026-10-13','某某劳保用品有限公司','91310000MB1A2B3C4D',2520,327.6,2847.6,'增值税专用发票','正常',1,'2026-10'],
+  ]
+};
+
+const T_VEHICLE = {
+  key:'vehicle', label:'机动车销售统一发票', count:1204,
+  cols:[
+    {f:'invoice_no',h:'发票号码',w:142,stick:'s1'},
+    {f:'vin',h:'车辆识别代号',w:170,stick:'s2'},
+    {f:'brand',h:'厂牌型号',w:140},
+    {f:'cert',h:'合格证号',w:140},
+    {f:'engine',h:'发动机号',w:130},
+    {f:'tonnage',h:'吨位',w:70,r:1},
+    {f:'seats',h:'限乘人数',w:82,r:1},
+    {f:'amount',h:'不含税价',w:110,r:1,money:1},
+    {f:'tax',h:'税额',w:100,r:1,money:1},
+    {f:'tax_office',h:'主管税务机关',w:170},
+    {f:'period',h:'所属期间',w:84},
+  ],
+  filters:[
+    {label:'所属期间',type:'fake',v:'2026-10'},
+    {label:'发票号码',type:'text',ph:'精确匹配'},
+    {label:'车辆识别代号',type:'text',ph:'后 6 位可模糊'},
+    {label:'厂牌型号',type:'text',ph:'模糊匹配'},
+  ],
+  rows:[
+    ['24101000003','LNJ1041A2P0012345','南京依维柯 NJ1041','WDA2026100012','E4D20Q0012',3.5,3,128000,16640,'国家税务总局上海市某某区税务局','2026-10'],
+    ['24101000021','LJD5020XXYP002211','东风多利卡 D6','WDA2026100219','YN25CRD118',4.5,3,186000,24180,'国家税务总局上海市某某区税务局','2026-10'],
+    ['24101000034','LZW6400VNP003344','五菱宏光 V','WDA2026100411','LJ465Q2E09',1.8,8,74600,9698,'国家税务总局上海市某某区税务局','2026-10'],
+    ['24101000052','LSV1A2B3C4P005566','大众途观 L','WDA2026100588','DKX00123456',2.0,5,219000,28470,'国家税务总局上海市某某区税务局','2026-10'],
+    ['24101000078','LFV3A2B4C5P007788','一汽解放 J6F','WDA2026100790','CA4DC2130012',6.0,3,236000,30680,'国家税务总局上海市某某区税务局','2026-10'],
+  ]
+};
+
+const T_CERT = {
+  key:'cert', label:'认证清单', count:1180,
+  cols:[
+    {f:'invoice_no',h:'发票号码',w:142,stick:'s1'},
+    {f:'invoice_code',h:'发票代码',w:118,stick:'s2'},
+    {f:'seller',h:'销方名称',w:206},
+    {f:'cert_date',h:'认证日期',w:98},
+    {f:'cert_period',h:'认证期间',w:92},
+    {f:'amount',h:'金额',w:110,r:1,money:1},
+    {f:'tax',h:'可抵扣税额',w:112,r:1,money:1},
+    {f:'cert_status',h:'认证状态',w:96},
+    {f:'source',h:'数据来源',w:120},
+  ],
+  filters:[
+    {label:'认证期间',type:'fake',v:'2026-10'},
+    {label:'发票号码',type:'text',ph:'精确匹配'},
+    {label:'销方名称',type:'text',ph:'模糊匹配'},
+    {label:'认证状态',type:'fake',v:'全部'},
+  ],
+  rows:[
+    ['24101000001','3100264140','某某钢铁贸易有限公司','2026-10-12','2026-10',13200,1668,'已认证','勾选认证平台'],
+    ['24101000002','3100264140','某某办公用品有限公司','2026-10-12','2026-10',800,104,'已认证','勾选认证平台'],
+    ['24101000005','3100264142','某某建筑工程有限公司','2026-10-12','2026-10',450000,40500,'已认证','勾选认证平台'],
+    ['24101000006','3100264142','某某置业管理有限公司','2026-10-12','2026-10',86000,7740,'已认证','勾选认证平台'],
+    ['24101000009','3100264144','某某供电服务有限公司','2026-10-12','2026-10',81600,10608,'已认证','勾选认证平台'],
+  ]
+};
+
+const T_PAYABLE = {
+  key:'payable', label:'应付凭证', count:8420,
+  cols:[
+    {f:'voucher_no',h:'凭证号',w:132,stick:'s1'},
+    {f:'line_no',h:'行号',w:52,stick:'s2',r:1},
+    {f:'voucher_date',h:'凭证日期',w:98},
+    {f:'subject',h:'科目',w:150},
+    {f:'vendor',h:'供应商',w:200},
+    {f:'invoice_no',h:'关联发票号',w:132},
+    {f:'debit',h:'借方金额',w:110,r:1,money:1},
+    {f:'credit',h:'贷方金额',w:110,r:1,money:1},
+    {f:'summary',h:'摘要',w:220},
+    {f:'provider',h:'文件提供者',w:100},
+    {f:'received',h:'接收日期',w:98},
+  ],
+  filters:[
+    {label:'凭证日期',type:'fake',v:'2026-10-01 ~ 10-31'},
+    {label:'凭证号',type:'text',ph:'精确或前缀匹配'},
+    {label:'供应商',type:'text',ph:'模糊匹配'},
+    {label:'关联发票号',type:'text',ph:'精确匹配'},
+    {label:'科目',type:'fake',v:'全部'},
+  ],
+  rows:[
+    ['AP-202610-0012',1,'2026-10-08','2202 应付账款','某某钢铁贸易有限公司','24101000001',0,14868,'10月钢材采购入库','王五','2026-10-12'],
+    ['AP-202610-0012',2,'2026-10-08','1403 原材料','某某钢铁贸易有限公司','24101000001',13200,0,'10月钢材采购入库','王五','2026-10-12'],
+    ['AP-202610-0013',1,'2026-10-09','2202 应付账款','某某办公用品有限公司','24101000002',0,904,'办公用品采购','王五','2026-10-12'],
+    ['AP-202610-0021',1,'2026-10-10','2202 应付账款','某某建筑工程有限公司','24101000005',0,490500,'厂区改造工程进度款','王五','2026-10-12'],
+    ['AP-202610-0033',1,'2026-10-12','2202 应付账款','某某钢铁贸易有限公司','24101000010',9944,0,'冷轧板卷退货冲回','王五','2026-10-12'],
+  ]
+};
+
+const QUERIES = {
+  'q-invoice': { title:'发票数据', switchLabel:'数据表', tables:[T_DETAIL,T_HEADER] },
+  'q-industry':{ title:'特定行业', switchLabel:'行业类型', tables:[
+      T_VEHICLE,
+      {...T_VEHICLE,key:'usedcar',label:'二手车销售统一发票',count:36},
+      {...T_VEHICLE,key:'agri',label:'农产品收购发票',count:892},
+      {...T_VEHICLE,key:'freight',label:'货物运输服务',count:2301},
+      {...T_VEHICLE,key:'construct',label:'建筑服务',count:145},
+      {...T_VEHICLE,key:'lease',label:'不动产经营租赁',count:12},
+      {...T_VEHICLE,key:'passenger',label:'旅客运输服务',count:438},
+  ]},
+  'q-cert':    { title:'认证清单', switchLabel:null, tables:[T_CERT] },
+  'q-voucher': { title:'凭证数据', switchLabel:'凭证类型', tables:[
+      T_PAYABLE,
+      {...T_PAYABLE,key:'related',label:'关联方凭证',count:1205},
+      {...T_PAYABLE,key:'bank',label:'银行费用凭证',count:0},
+      {...T_PAYABLE,key:'travel',label:'差旅费用凭证',count:0},
+  ]},
+};
+
+/* ════════ 状态 ════════ */
+const S = {
+  nav:'imp-tax',
+  src:{ 'imp-tax':'invoices', 'imp-voucher':'payable' },
+  table:{ 'q-invoice':'detail', 'q-industry':'vehicle', 'q-cert':'cert', 'q-voucher':'payable' },
+  row:{},
+  selOpen:false,
+  tabs:['imp-tax'],
+};
+
+/* ════════ 渲染 ════════ */
+function renderNav(){
+  document.getElementById('navBody').innerHTML = NAV.map(g=>`
+    <div class="nav-group">${g.group}</div>
+    ${g.items.map(it=>`
+      <button class="nav-item ${S.nav===it.key?'on':''}" onclick="go('${it.key}')" title="${it.label}">
+        <span class="nav-ico">${it.ico}</span><span class="nav-label">${it.label}</span>
+      </button>`).join('')}
+  `).join('');
+}
+
+function tabTitle(key){
+  if(IMPORTS[key]){
+    const m=IMPORTS[key], s=m.srcs.find(x=>x.key===S.src[key]);
+    return `${m.title}<span class="tab-dim"> · ${s.name}</span>`;
+  }
+  if(QUERIES[key]){
+    const q=QUERIES[key], t=q.tables.find(x=>x.key===S.table[key]);
+    return q.tables.length>1 ? `${q.title}<span class="tab-dim"> · ${t.label}</span>` : q.title;
+  }
+  const found = NAV.flatMap(g=>g.items).find(i=>i.key===key);
+  return found?found.label:key;
+}
+
+function renderTabs(){
+  document.getElementById('tabbar').innerHTML = S.tabs.map(k=>`
+    <button class="tab ${S.nav===k?'on':''}" onclick="go('${k}')">
+      <span>${tabTitle(k)}</span>
+      <span class="x" onclick="event.stopPropagation();closeTab('${k}')">×</span>
+    </button>`).join('');
+}
+
+function go(key){
+  S.nav=key; S.selOpen=false;
+  if(!S.tabs.includes(key)) S.tabs.push(key);
+  render();
+}
+function closeTab(key){
+  S.tabs=S.tabs.filter(t=>t!==key);
+  if(S.nav===key) S.nav=S.tabs[S.tabs.length-1]||'imp-tax';
+  if(!S.tabs.length) S.tabs=['imp-tax'];
+  render();
+}
+function pickSrc(k){ S.src[S.nav]=k; render(); }
+function pickTable(k){ S.table[S.nav]=k; S.selOpen=false; S.row={}; render(); }
+function toggleSel(){ S.selOpen=!S.selOpen; render(); }
+function pickRow(i){ S.row[S.nav]=(S.row[S.nav]===i?null:i); render(); }
+function toggleNav(){ document.getElementById('nav').classList.toggle('collapsed'); }
+
+/* ───── 采集：双列 ───── */
+function renderImport(){
+  const m=IMPORTS[S.nav], cur=m.srcs.find(s=>s.key===S.src[S.nav]);
+  const srcCol=`
+    <aside class="srcs">
+      <div class="srcs-head"><h3>数据源</h3><span class="period-pill">2026-10</span></div>
+      <div class="srcs-list">
+        ${m.srcs.map(s=>`
+          <button class="src ${s.key===cur.key?'on':''}" onclick="pickSrc('${s.key}')">
+            <div class="src-top"><span class="src-name">${s.name}</span></div>
+            <div class="src-meta">
+              <span class="badge ${s.badge[0]}">${s.badge[1]}</span>
+              <span class="src-note">${s.note}</span>
+            </div>
+          </button>`).join('')}
+      </div>
+      <div class="srcs-foot">本列只列数据源与本期状态 —— 不放宽表格，所以 236px 够用。</div>
+    </aside>`;
+
+  const dropZone = cur.file ? `
+    <div class="drop has">
+      <span class="drop-ico">▤</span>
+      <div class="drop-grow">
+        <div class="drop-main">${cur.file.split('  ·  ')[0]}</div>
+        <div class="drop-sub">${cur.file.split('  ·  ')[1]} · 已选择，未开始导入</div>
+      </div>
+      <button class="btn">重新选择</button>
+      <button class="btn btn-primary">开始导入</button>
+    </div>` : `
+    <div class="drop">
+      <div class="drop-main">将 Excel 拖放到此处</div>
+      <div class="drop-sub" style="margin-bottom:12px">或从本地选择文件</div>
+      <button class="btn btn-primary">选择文件</button>
+    </div>`;
+
+  const extraFields = cur.fields.length ? `
+    <div class="block">
+      <div class="block-head"><h4>导入登记</h4><span class="when">用于数据溯源，必填</span></div>
+      <div class="fields">
+        ${cur.fields.map(([l,v])=>`
+          <div class="field"><label>${l}</label>
+            <input value="${v}" placeholder="${l==='接收日期'?'YYYY-MM-DD':'填写姓名'}">
+          </div>`).join('')}
+      </div>
+    </div>` : '';
+
+  const banner = cur.state==='bad' ? `
+    <div class="banner bad">
+      <span class="banner-ico">⛔</span>
+      <div style="flex:1">
+        <h5>校验未通过，本次未写入任何数据</h5>
+        <p>3 条明细校验失败。导入采用单事务全量提交，避免部分写入造成重复导入与期末计算偏差。请修正原文件后重新上传。</p>
+        <div class="acts">
+          <button class="btn btn-sm">导出错误清单</button>
+          <button class="btn btn-sm">重新选择文件</button>
+        </div>
+      </div>
+    </div>` : cur.state==='ok' ? `
+    <div class="banner ok">
+      <span class="banner-ico">✓</span>
+      <div style="flex:1">
+        <h5>导入完成</h5>
+        <p>${cur.sheets.map(s=>s[0]+' '+s[1]).join(' · ')}</p>
+        <div class="acts">
+          <button class="btn btn-sm btn-primary" onclick="go('${cur.key==='cert'?'q-cert':'q-invoice'}')">查看数据 →</button>
+          <button class="btn btn-sm">继续导入其他数据源</button>
+        </div>
+      </div>
+    </div>` : '';
+
+  const sheets = cur.sheets.length ? `
+    <div class="block">
+      <div class="block-head"><h4>工作表解析结果</h4><span class="sp"></span><span class="when">10-13 15:04</span></div>
+      <table class="sheets">
+        ${cur.sheets.map(([n,c,st])=>`
+          <tr>
+            <td class="s-name">${n}</td>
+            <td class="s-n num">${c}</td>
+            <td class="s-st">${st.includes('失败')?'<span style="color:var(--danger)">'+st+'</span>':st.includes('警告')?'<span style="color:var(--warn)">'+st+'</span>':st}</td>
+          </tr>`).join('')}
+      </table>
+    </div>` : '';
+
+  const errs = cur.errs.length ? `
+    <div class="block">
+      <div class="block-head"><h4>校验明细</h4><span class="sp"></span>
+        <button class="btn btn-sm">导出错误清单</button></div>
+      <div class="errs">
+        <div class="errs-bar"><strong>3 条失败</strong><span style="color:var(--warn)">12 条警告</span>
+          <span class="sp" style="flex:1"></span>
+          <span style="color:var(--text-3)">行号对应原 Excel，可直接定位修改</span></div>
+        ${cur.errs.map(g=>`
+          <div class="err-grp">${g.grp}</div>
+          ${g.rows.map(r=>`
+            <div class="err">
+              <span class="err-row mono">${r[0]}</span>
+              <span class="err-field">${r[1]}</span>
+              <span class="err-msg">${r[2]}</span>
+            </div>`).join('')}
+        `).join('')}
+        <button class="err-more">展开其余 11 条警告</button>
+      </div>
+    </div>` : '';
+
+  const hist = `
+    <div class="block">
+      <div class="block-head"><h4>导入记录</h4><span class="when">错误清单已落库，关掉页签再回来仍可查看</span></div>
+      ${cur.hist.length ? `<table class="hist">
+        ${cur.hist.map(h=>`<tr>
+          <td class="h-st" style="color:${h[0]==='✓'?'var(--ok)':'var(--danger)'}">${h[0]}</td>
+          <td class="h-when mono">${h[1]}</td>
+          <td class="mono">${h[2]}</td>
+          <td>${h[3]}</td>
+          <td style="text-align:right"><button class="btn btn-sm">详情</button></td>
+        </tr>`).join('')}
+      </table>` : `<p style="font-size:12px;color:var(--text-3)">尚无导入记录。</p>`}
+    </div>`;
+
+  return srcCol + `
+    <div class="pane">
+      <div class="pane-head">
+        <h2>${cur.name}</h2>
+        <p>${cur.desc}</p>
+      </div>
+      <div class="pane-body">
+        ${dropZone}
+        ${extraFields}
+        ${banner?'<div class="block">'+banner+'</div>':''}
+        ${sheets}${errs}${hist}
+      </div>
+    </div>`;
+}
+
+/* ───── 查询：单 sidebar + 全宽表 ───── */
+function renderQuery(){
+  const q=QUERIES[S.nav], t=q.tables.find(x=>x.key===S.table[S.nav])||q.tables[0];
+  const sel = q.switchLabel ? `
+    <div class="q-switch">
+      <span class="lb">${q.switchLabel}</span>
+      <div class="sel">
+        <button class="sel-btn" onclick="toggleSel()">
+          <span>${t.label}</span><span class="caret">▼</span>
+        </button>
+        <div class="sel-menu ${S.selOpen?'open':''}">
+          ${q.tables.map(x=>`
+            <button class="sel-opt ${x.key===t.key?'on':''}" onclick="pickTable('${x.key}')">
+              <span>${x.label}</span>
+              <span class="c ${x.count===0?'zero':''}">${x.count===0?'本期无数据':x.count.toLocaleString()}</span>
+            </button>`).join('')}
+        </div>
+      </div>
+      <span style="font-size:11px;color:var(--text-3)">切换即跳转到该表的独立路由，筛选表单随之整体替换</span>
+    </div>` : '';
+
+  const fbar = `
+    <div class="fbar">
+      <div class="fields">
+        ${t.filters.map(f=>f.type==='fake'
+          ? `<div class="field"><label>${f.label}</label><div class="fake"><span class="v">${f.v}</span><span style="color:var(--text-3);font-size:9px">▼</span></div></div>`
+          : `<div class="field"><label>${f.label}</label><input placeholder="${f.ph}"></div>`).join('')}
+        <div class="field"><label>&nbsp;</label><button class="btn btn-ghost btn-sm" style="height:27px">更多条件 ▾</button></div>
+      </div>
+      <div class="fbar-acts">
+        <button class="btn btn-primary">查询</button>
+        <button class="btn btn-ghost">重置</button>
+        <span class="sp"></span>
+        <span class="count">共 <b>${t.count.toLocaleString()}</b> 条</span>
+        <button class="btn btn-sm">⚙ 显示列</button>
+        <button class="btn btn-sm">⇕ 密度</button>
+        <button class="btn btn-sm">导出 Excel</button>
+      </div>
+    </div>`;
+
+  const sel_i = S.row[S.nav];
+  const tbl = `
+    <div class="tw">
+      <table class="dt">
+        <thead><tr>
+          ${t.cols.map(c=>`<th class="${c.stick?'stick '+c.stick:''} ${c.r?'r':''}" style="min-width:${c.w}px;width:${c.w}px">${c.h}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+          ${t.rows.map((row,i)=>`
+            <tr class="${sel_i===i?'on':''}" onclick="pickRow(${i})">
+              ${t.cols.map((c,j)=>{
+                let v=row[j];
+                let cls=(c.stick?'stick '+c.stick:'')+' '+(c.r?'num r':'');
+                if(c.money||typeof v==='number'&&c.r) { 
+                  const neg = typeof v==='number' && v<0;
+                  v = typeof v==='number' ? (c.money?money(v):v.toLocaleString('zh-CN')) : v;
+                  if(neg) cls+=' neg';
+                }
+                if(c.f==='invoice_no'||c.f==='voucher_no'||c.f==='vin'||c.f==='invoice_code') cls+=' mono';
+                if(c.f==='status'||c.f==='cert_status') v=`<span class="chip ${String(row[j]).includes('红冲')?'red':''}">${row[j]}</span>`;
+                return `<td class="${cls}">${v}</td>`;
+              }).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  const pager = `
+    <div class="pager">
+      <span>共 <b style="color:var(--text)">${t.count.toLocaleString()}</b> 条 · 服务端分页</span>
+      <span>每页 100 ▾</span>
+      <span class="sp"></span>
+      <div class="pg">
+        <button>‹</button><button class="on">1</button><button>2</button><button>3</button>
+        <span class="gap">…</span><button>${Math.max(1,Math.ceil(t.count/100))}</button><button>›</button>
+      </div>
+    </div>`;
+
+  let panel='';
+  if(sel_i!=null && t.rows[sel_i]){
+    const row=t.rows[sel_i];
+    panel=`
+      <aside class="detail">
+        <div class="detail-head">
+          <div style="flex:1">
+            <h4>${t.label} · 单行详情</h4>
+            <p>表格只放核心列，全部字段在此查看</p>
+          </div>
+          <button class="btn btn-sm btn-ghost" onclick="pickRow(${sel_i})">×</button>
+        </div>
+        <div class="detail-body">
+          <div class="dsec">全部字段（${t.cols.length}）</div>
+          ${t.cols.map((c,j)=>{
+            let v=row[j];
+            if(typeof v==='number') v=c.money?money(v):v.toLocaleString('zh-CN');
+            return `<dl class="drow"><dt>${c.h}</dt><dd ${typeof row[j]==='number'?'class="mono"':''} style="${typeof row[j]==='number'&&row[j]<0?'color:var(--danger)':''}">${v}</dd></dl>`;
+          }).join('')}
+        </div>
+        <div class="detail-foot">
+          <button class="btn btn-sm">‹ 上一条</button>
+          <button class="btn btn-sm">下一条 ›</button>
+        </div>
+      </aside>`;
+  }
+
+  return `<div class="q">${sel}${fbar}${tbl}${pager}</div>${panel}`;
+}
+
+function renderStub(){
+  const it=NAV.flatMap(g=>g.items).find(i=>i.key===S.nav);
+  return `<div class="pane"><div class="pane-head"><h2>${it.label}</h2>
+    <p>该模块不在本次布局讨论范围内，原型未展开。</p></div></div>`;
+}
+
+function render(){
+  renderNav(); renderTabs();
+  const stage=document.getElementById('stage');
+  const notes={
+    'imp-tax':'采集 = 双列：墨色主栏 → 纸灰数据源列 → 白色内容面。空间需求小，列表常驻可比对本期完整性',
+    'imp-voucher':'凭证各自的登记字段不同（接收日期、文件提供者），内容面各渲染各的',
+    'q-invoice':'查询 = 单栏 + 全宽表格。固定左两列，横向滚动；点任意行看全部字段',
+    'q-industry':'7 个行业表用下拉切换，选项带本期记录数，一眼看出哪些为空',
+    'q-cert':'只有一张表，就不套下拉 —— 不为了统一而加控件',
+    'q-voucher':'4 张凭证表同理；本期未导入的显示「本期无数据」',
+  };
+  document.getElementById('noteText').textContent = notes[S.nav] || '左侧切换模块，看两种布局的差别';
+
+  if(IMPORTS[S.nav]) stage.innerHTML=renderImport();
+  else if(QUERIES[S.nav]) stage.innerHTML=renderQuery();
+  else stage.innerHTML=renderStub();
+}
+
+document.addEventListener('click',e=>{
+  if(S.selOpen && !e.target.closest('.sel')){ S.selOpen=false; render(); }
+});
+render();
+</script>
+</body>
+</html>

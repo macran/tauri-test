@@ -1,0 +1,11 @@
+# 追加到 src-tauri/Cargo.toml 的 [dependencies]
+# 如果进项发票项目已经用了 zip / quick-xml，版本保持一致即可
+zip = { version = "2", default-features = false, features = ["deflate"] }
+quick-xml = "0.37"
+chrono = { version = "0.4", default-features = false, features = ["std", "serde"] }
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+tauri-plugin-dialog = "2"
+
+[dev-dependencies]
+calamine = "0.26"

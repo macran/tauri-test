@@ -1,0 +1,427 @@
+@import "@fontsource-variable/inter";
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans:
+    "Inter Variable", "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+
+  /* 新增：高级感 surface shadow tokens */
+  --shadow-hairline: var(--shadow-hairline);
+  --shadow-surface-xs: var(--shadow-surface-xs);
+  --shadow-surface-sm: var(--shadow-surface-sm);
+  --shadow-surface-md: var(--shadow-surface-md);
+  --shadow-surface-lg: var(--shadow-surface-lg);
+
+  /* 可选：覆盖 Tailwind 默认 shadow，让 shadcn 的 shadow-sm / shadow-md 也更细腻 */
+  --shadow-sm: var(--shadow-surface-xs);
+  --shadow-md: var(--shadow-surface-sm);
+  --shadow-lg: var(--shadow-surface-md);
+  --shadow-xl: var(--shadow-surface-lg);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: #f8fafc;
+  --foreground: #111827;
+
+  --card: #ffffff;
+  --card-foreground: #111827;
+
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+
+  --muted: #f1f5f9;
+  --muted-foreground: #6b7280;
+
+  --accent: #2563eb;
+  --accent-foreground: #ffffff;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /*
+    保留 border 给 input / table / separator / focus 等结构边界使用。
+    但颜色稍微降低一点存在感。
+  */
+  --border: #e7eaf0;
+  --input: #e5e7eb;
+  --ring: #2563eb;
+
+  --chart-1: #2563eb;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #8b5cf6;
+
+  --radius: 12px;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #0f172a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e7eaf0;
+  --sidebar-ring: #2563eb;
+
+  /*
+    Surface Hairline Shadow
+    第一层 0 0 0 1px 是 hairline，用 shadow 模拟极细边界。
+    后面几层分别是 contact shadow 和 ambient shadow。
+  */
+  --shadow-hairline: 0 0 0 1px rgb(15 23 42 / 0.06);
+
+  --shadow-surface-xs:
+    0 0 0 1px rgb(15 23 42 / 0.055), 0 1px 2px rgb(15 23 42 / 0.035);
+
+  --shadow-surface-sm:
+    0 0 0 1px rgb(15 23 42 / 0.06), 0 1px 2px rgb(15 23 42 / 0.04),
+    0 8px 24px rgb(15 23 42 / 0.045);
+
+  --shadow-surface-md:
+    0 0 0 1px rgb(15 23 42 / 0.065), 0 2px 6px rgb(15 23 42 / 0.05),
+    0 16px 40px rgb(15 23 42 / 0.06);
+
+  --shadow-surface-lg:
+    0 0 0 1px rgb(15 23 42 / 0.07), 0 8px 24px rgb(15 23 42 / 0.07),
+    0 24px 72px rgb(15 23 42 / 0.09);
+
+  /*
+    浅色卡片的轻微内高光。
+    只需要一点点，不能明显看到一条白线。
+  */
+  --surface-highlight: inset 0 1px 0 rgb(255 255 255 / 0.72);
+}
+
+.dark {
+  --background: #0b1120;
+  --foreground: #f8fafc;
+
+  --card: #111827;
+  --card-foreground: #f8fafc;
+
+  --popover: #111827;
+  --popover-foreground: #f8fafc;
+
+  --primary: #f8fafc;
+  --primary-foreground: #0f172a;
+
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+
+  --accent: #3b82f6;
+  --accent-foreground: #ffffff;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: #263244;
+  --input: #263244;
+  --ring: #3b82f6;
+
+  --chart-1: #3b82f6;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #8b5cf6;
+
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #263244;
+  --sidebar-ring: #3b82f6;
+
+  /*
+    暗色模式：
+    hairline 用白色透明度，而不是更深的黑边。
+  */
+  --shadow-hairline: 0 0 0 1px rgb(255 255 255 / 0.075);
+
+  --shadow-surface-xs:
+    0 0 0 1px rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.22);
+
+  --shadow-surface-sm:
+    0 0 0 1px rgb(255 255 255 / 0.075), 0 1px 2px rgb(0 0 0 / 0.24),
+    0 10px 28px rgb(0 0 0 / 0.28);
+
+  --shadow-surface-md:
+    0 0 0 1px rgb(255 255 255 / 0.08), 0 4px 12px rgb(0 0 0 / 0.28),
+    0 20px 52px rgb(0 0 0 / 0.34);
+
+  --shadow-surface-lg:
+    0 0 0 1px rgb(255 255 255 / 0.09), 0 10px 32px rgb(0 0 0 / 0.34),
+    0 32px 80px rgb(0 0 0 / 0.42);
+
+  --surface-highlight: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    min-height: 100vh;
+
+    /*
+      给页面背景一点非常淡的层次。
+      不要太明显，否则后台系统会显得花。
+    */
+    background:
+      radial-gradient(
+        circle at top left,
+        rgb(255 255 255 / 0.9),
+        transparent 32rem
+      ),
+      linear-gradient(180deg, rgb(255 255 255 / 0.42), transparent 18rem),
+      var(--background);
+  }
+
+  .dark body {
+    background:
+      radial-gradient(
+        circle at top left,
+        rgb(37 99 235 / 0.12),
+        transparent 34rem
+      ),
+      linear-gradient(180deg, rgb(15 23 42 / 0.4), transparent 18rem),
+      var(--background);
+  }
+
+  ::selection {
+    background: rgb(37 99 235 / 0.16);
+  }
+
+  .dark ::selection {
+    background: rgb(59 130 246 / 0.28);
+  }
+}
+@layer components {
+  /*
+    Surface 类组件：
+    它们表达的是视觉层级，不是结构分割。
+    因此把真实 border 变透明，边缘交给 shadow stack。
+  */
+  [data-slot="card"],
+  [data-slot="popover-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="hover-card-content"],
+  [data-slot="select-content"],
+  [data-slot="command-dialog"],
+  [data-slot="context-menu-content"],
+  [data-slot="menubar-content"] {
+    border-color: transparent;
+    box-shadow: var(--surface-highlight), var(--shadow-surface-sm);
+  }
+
+  /*
+    Dialog / Sheet / Drawer 层级更高，阴影可以更重一点。
+  */
+  [data-slot="dialog-content"],
+  [data-slot="sheet-content"],
+  [data-slot="drawer-content"] {
+    border-color: transparent;
+    box-shadow: var(--surface-highlight), var(--shadow-surface-lg);
+  }
+
+  /*
+    Sidebar 本身不是浮层，但可以给它一个很轻的分隔感。
+  */
+  [data-slot="sidebar"] {
+    box-shadow: var(--shadow-hairline);
+  }
+
+  /*
+    Table、Input、Textarea、Select Trigger 不建议去掉真实 border。
+    这些是结构边界 / 状态边界，保留 border 更合理。
+  */
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"],
+  [data-slot="table"],
+  [data-slot="separator"] {
+    box-shadow: none;
+  }
+
+  /*
+    如果你自己写业务卡片，可以直接加 className="surface-card"。
+  */
+  .surface-card {
+    border-color: transparent;
+    background: var(--card);
+    color: var(--card-foreground);
+    box-shadow: var(--surface-highlight), var(--shadow-surface-sm);
+  }
+
+  .surface-panel {
+    border-color: transparent;
+    background: var(--card);
+    color: var(--card-foreground);
+    box-shadow: var(--surface-highlight), var(--shadow-surface-md);
+  }
+
+  .surface-floating {
+    border-color: transparent;
+    background: var(--popover);
+    color: var(--popover-foreground);
+    box-shadow: var(--surface-highlight), var(--shadow-surface-lg);
+  }
+}
+/* ───── Win11 日期组件主题 ───── */
+[data-slot="win11-date-picker"],
+[data-slot="win11-calendar"] {
+  --w11-accent: var(--blue-primary, var(--primary));
+  --w11-accent-fg: var(--primary-foreground, #fff);
+  /* 选中项的浅色底，用于区间中段等场景 */
+  --w11-accent-soft: color-mix(in srgb, var(--w11-accent) 14%, transparent);
+  /* 字段态 */
+  --w11-field-bg: var(--background);
+  --w11-field-border: var(--input);
+}
+
+.dark [data-slot="win11-date-picker"],
+.dark [data-slot="win11-calendar"] {
+  --w11-accent: var(--accent-amber, var(--primary));
+  --w11-accent-fg: #1a1a1a;
+  --w11-field-bg: color-mix(in srgb, var(--background) 92%, #fff);
+}
+[data-slot="win11-date-picker"] {
+  --w11-field-bg: var(--background);
+  --w11-field-border: var(--input);
+}
+
+.dark [data-slot="win11-date-picker"] {
+  --w11-field-bg: color-mix(in srgb, var(--background) 92%, #fff);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   细滚动条：滚动条本身固定 8px（透明轨道，不显示两端箭头），
+   视觉上的粗细靠 thumb 的透明边框控制：静止 4px，hover/拖动 6px。
+   滚动条占位宽度始终不变，hover 时不会挤压内容区（否则表格会抖动）。
+   查询结果表格（横向 + 纵向）复用这个类。
+   ───────────────────────────────────────────────────────────── */
+.thin-scrollbar {
+  scrollbar-gutter: stable;
+}
+.thin-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.thin-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+.thin-scrollbar:hover::-webkit-scrollbar-thumb,
+.thin-scrollbar:active::-webkit-scrollbar-thumb {
+  background-color: var(--muted-foreground);
+  border-width: 1px;
+}
+@keyframes splash-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+/* 综合查询：多值记录的"槽位"——同一条记录的各字段悬停时一起高亮 */
+.ov-slot {
+  border-radius: 2px;
+}
+.ov-slot.lit {
+  background: var(--bandbg);
+  box-shadow: inset 0 0 0 1px var(--hue);
+}
+.ov-stack .ov-slot {
+  display: block;
+  position: relative;
+  padding: 0 4px 0 18px;
+  line-height: 20px;
+}
+.ov-stack .ov-slot::before {
+  content: attr(data-n);
+  position: absolute;
+  left: 3px;
+  top: 4px;
+  width: 11px;
+  font: 500 9px/12px ui-monospace, monospace;
+  text-align: center;
+  color: var(--hue);
+  background: var(--bandbg);
+  border-radius: 2px;
+}
+.ov-stack .stack-hide {
+  display: none;
+}
