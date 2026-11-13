@@ -21,6 +21,7 @@ import { AppButton } from "@/components/app-button";
 import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
 import { toast } from "@/components/ui/toast";
 import { useAppStore } from "@/store/useAppStore";
+import { useStartupStatus } from "@/features/startup/useStartupStatus";
 
 /** 完成后在 100% 停一下再关弹窗，让用户看到“做完了”，而不是进度条跳到一半就消失 */
 const DONE_HOLD_MS = 400;
@@ -40,11 +41,13 @@ export default function LeSwitcher() {
   const [progress, setProgress] = useState<StartupProgress>({ percent: 0, message: "正在准备…" });
   const [error, setError] = useState<string | null>(null);
 
+  const backendReady = useStartupStatus().data?.phase === "ready";
   useEffect(() => {
+    if (!backendReady) return;
     void commands.listSwitchableLes().then((r) => {
       if (r.status === "ok") setData(r.data);
     });
-  }, []);
+  }, [backendReady]);
 
   // 把当前 LE 和可选列表同步给用户菜单（菜单里的「切换 LE」读它）
   useEffect(() => {

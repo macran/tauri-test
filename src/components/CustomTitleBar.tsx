@@ -15,6 +15,7 @@ import { cn } from "../lib/utils"
 import LeSwitcher from "./LeSwitcher"
 import { commands, type CurrentUser } from "../bindings"
 import { useAppStore } from "../store/useAppStore"
+import { useStartupStatus } from "../features/startup/useStartupStatus"
 
 interface TitleBarProps {
   isDark: boolean
@@ -34,11 +35,14 @@ export default function CustomTitleBar({ isDark, toggleTheme, onNavigate }: Titl
   const openSettingsTab = useAppStore((s) => s.openSettingsTab)
   const leOptions = useAppStore((s) => s.leOptions)
   const requestLeSwitch = useAppStore((s) => s.requestLeSwitch)
+  // 标题栏在后端初始化完成前就已挂载，此时 AppRuntimeState 还没注册，必须等 ready 再取
+  const backendReady = useStartupStatus().data?.phase === "ready"
   useEffect(() => {
+    if (!backendReady) return
     void commands.currentUserInfo().then((r) => {
       if (r.status === "ok") setUser(r.data)
     })
-  }, [])
+  }, [backendReady])
 
   useEffect(() => {
     appWindow.isMaximized().then(setIsMaximized)
@@ -286,7 +290,8 @@ export default function CustomTitleBar({ isDark, toggleTheme, onNavigate }: Titl
                 </span>
                 <span style={{ color: 'var(--text-faint)' }}>中文</span>
               </button>
-              {leOptions && leOptions.les.length > 1 && (
+              {/* 只要拿到了 LE 列表就显示，哪怕只有一个：当前那一项灰着并标「当前」，用户至少知道有这个功能 */}
+              {leOptions && leOptions.les.length > 0 && (
                 <div className="py-1">
                   <div className="flex items-center gap-2 px-3 py-1 text-[10px]" style={{ color: 'var(--text-faint)' }}>
                     <Buildings className="w-3.5 h-3.5" weight="duotone" /> 切换 LE

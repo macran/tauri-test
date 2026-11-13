@@ -2049,7 +2049,7 @@ export type StorageStatus = {
  */
 dbFile: string; 
 /**
- * 主文件 + WAL 的体积。写入先进 WAL，只看主文件的话，批量导入后电池不会动
+ * 数据库文件大小（页数 × 页大小）。写入先进 WAL，只看主文件长度的话，批量导入后电池不会动
  */
 usedBytes: number; limitBytes: number; 
 /**

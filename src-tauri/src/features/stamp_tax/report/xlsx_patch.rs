@@ -23,6 +23,8 @@ pub enum CellValue {
     Number(String),
     /// 文本：以 inlineStr 写入，不需要改动 sharedStrings.xml
     Text(String),
+    /// 公式（已是 XML 转义前的原文）+ 缓存值；缓存值为空串表示结果是 ""
+    Formula { f: String, cached: String },
 }
 
 /// 对一个 sheet XML 的修改指令
@@ -48,6 +50,14 @@ pub fn cell_xml(out: &mut String, cell_ref: &str, style: u32, value: Option<&Cel
         }
         Some(CellValue::Number(v)) => {
             let _ = write!(out, r#"<c r="{cell_ref}" s="{style}"><v>{v}</v></c>"#);
+        }
+        Some(CellValue::Formula { f, cached }) => {
+            let f = quick_xml::escape::escape(f.as_str());
+            if cached.is_empty() {
+                let _ = write!(out, r#"<c r="{cell_ref}" s="{style}" t="str"><f>{f}</f><v></v></c>"#);
+            } else {
+                let _ = write!(out, r#"<c r="{cell_ref}" s="{style}"><f>{f}</f><v>{cached}</v></c>"#);
+            }
         }
         Some(CellValue::Text(t)) => {
             let _ = write!(

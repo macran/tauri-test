@@ -47,7 +47,8 @@ fn fts_phrase(keyword: &str) -> String {
 }
 
 /// 销方名称 / 备注的检索条件：返回 (SQL 片段, 参数)；关键词为空返回 None。
-/// ≥ 3 字符：`{header}.id IN (SELECT rowid FROM invoice_headers_fts WHERE {fts_col} MATCH ?)`
+/// ≥ 3 字符：销方名称（`fts_col = "seller_name"`）查 sellers_fts 再按 seller_id 关联；
+///           备注（`fts_col = "remark"`）查 invoice_headers_fts。
 /// < 3 字符：`{like_col} LIKE ?`（trigram 对 1~2 个字符完全搜不到，必须回退）
 pub(crate) fn text_search(
     header: &str,
@@ -57,10 +58,12 @@ pub(crate) fn text_search(
 ) -> Option<(String, Value)> {
     let t = keyword.map(str::trim).filter(|t| !t.is_empty())?;
     if t.chars().count() >= FTS_MIN_CHARS {
-        Some((
-            format!("{header}.id IN (SELECT rowid FROM invoice_headers_fts WHERE {fts_col} MATCH ?)"),
-            Value::Text(fts_phrase(t)),
-        ))
+        let clause = if fts_col == "seller_name" {
+            format!("{header}.seller_id IN (SELECT rowid FROM sellers_fts WHERE name MATCH ?)")
+        } else {
+            format!("{header}.id IN (SELECT rowid FROM invoice_headers_fts WHERE {fts_col} MATCH ?)")
+        };
+        Some((clause, Value::Text(fts_phrase(t))))
     } else {
         Some((format!("{like_col} LIKE ?"), Value::Text(format!("%{t}%"))))
     }
@@ -1598,6 +1601,14 @@ mod fts_search_tests {
     }
 
     #[test]
+    fn empty_remark_is_not_indexed() {
+        let c = conn();
+        // 发票 3 的备注为空：不写 FTS 行；发票 1、2、4 有备注
+        let n: i64 = c.query_row("SELECT count(*) FROM invoice_headers_fts_docsize", [], |r| r.get(0)).unwrap();
+        assert_eq!(n, 3);
+    }
+
+    #[test]
     fn case_insensitive_and_fts_syntax_chars_are_literal() {
         let c = conn();
         assert_eq!(ids(&c, Some("abc trad"), None), vec![4]); // 大小写不敏感，空格是普通字符
@@ -1635,14 +1646,14 @@ mod fts_search_tests {
             "INSERT INTO sellers(id, tax_no, name) VALUES (1, 'T1', '北京滴滴出行科技有限公司');
              INSERT INTO invoice_headers(id, e_num, seller_id, issue_date, amount, tax, total, source, inv_type, state, is_pos, risk, remark)
                VALUES (1,'E1',1,'2026-09-01',100,9,109,1,1,1,1,1,'出差打车费用');
-             -- 退回成旧结构：unicode61 分词的 FTS 表（同样不含 trigram），且里面是空的
+             -- 退回成旧结构：销方名称存在发票头索引里（带 seller_name 列），且是空的；sellers_fts 不存在
              DROP TRIGGER invoice_headers_ai; DROP TRIGGER invoice_headers_au;
-             DROP TRIGGER invoice_headers_ad; DROP TRIGGER sellers_au;
-             DROP TABLE invoice_headers_fts;
-             CREATE VIRTUAL TABLE invoice_headers_fts USING fts5(seller_name, remark, content='', contentless_delete=1, tokenize='unicode61');",
+             DROP TRIGGER invoice_headers_ad; DROP TRIGGER sellers_ai; DROP TRIGGER sellers_au; DROP TRIGGER sellers_ad;
+             DROP TABLE invoice_headers_fts; DROP TABLE sellers_fts;
+             CREATE VIRTUAL TABLE invoice_headers_fts USING fts5(seller_name, remark, content='', contentless_delete=1, tokenize='trigram');",
         )
         .unwrap();
-        assert_eq!(ids(&c, Some("滴滴出行"), None), Vec::<u32>::new()); // 旧索引是空的，搜不到
+        assert_eq!(ids(&c, None, Some("出差打车")), Vec::<u32>::new()); // 旧索引是空的，搜不到
 
         crate::db::schema::init_db(&mut c).unwrap(); // 升级
 
@@ -1651,7 +1662,7 @@ mod fts_search_tests {
         let sql: String = c
             .query_row("SELECT sql FROM sqlite_master WHERE name = 'invoice_headers_fts'", [], |r| r.get(0))
             .unwrap();
-        assert!(sql.contains("trigram"));
+        assert!(sql.contains("trigram") && !sql.contains("seller_name"));
         // 触发器也被重建：新插入的发票头能搜到
         c.execute_batch(
             "INSERT INTO invoice_headers(id, e_num, seller_id, issue_date, amount, tax, total, source, inv_type, state, is_pos, risk, remark)

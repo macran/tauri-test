@@ -4,6 +4,8 @@
 
 use std::{fs, path::Path};
 
+use rusqlite::{Connection, OpenFlags};
+
 use serde::Serialize;
 use specta::Type;
 
@@ -19,7 +21,7 @@ use crate::{
 pub struct StorageStatus {
     /// 当前正在使用的库文件名
     pub db_file: String,
-    /// 主文件 + WAL 的体积。写入先进 WAL，只看主文件的话，批量导入后电池不会动
+    /// 数据库文件大小（页数 × 页大小）。写入先进 WAL，只看主文件长度的话，批量导入后电池不会动
     #[specta(type = f64)]
     pub used_bytes: u64,
     #[specta(type = f64)]
@@ -33,15 +35,22 @@ pub struct StorageStatus {
     pub last_backup_at: Option<u64>,
 }
 
-fn file_len(path: &Path) -> u64 {
-    fs::metadata(path).map(|m| m.len()).unwrap_or(0)
-}
-
-/// 主文件 + `-wal`。`-shm` 是共享内存索引，不算数据量。
-fn db_bytes(db: &Path) -> u64 {
-    let mut wal = db.as_os_str().to_owned();
-    wal.push("-wal");
-    file_len(db) + file_len(Path::new(&wal))
+/// 数据库文件大小 = page_count × page_size（含空闲页，VACUUM 前不会缩小）。
+/// 不用「主文件 + -wal」：WAL 不会自动缩短，而且同一页在 WAL 和主文件里各有一份，会重复计算。
+/// 另开只读连接读，不抢业务连接的锁（导入期间业务连接被长时间占用）；打不开时退回主文件长度。
+pub(crate) fn db_bytes(db: &Path) -> u64 {
+    let pages = Connection::open_with_flags(db, OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .and_then(|c| {
+            c.query_row(
+                "SELECT (SELECT page_count FROM pragma_page_count) * (SELECT page_size FROM pragma_page_size)",
+                [],
+                |r| r.get::<_, i64>(0),
+            )
+        })
+        .ok();
+    pages
+        .map(|n| n as u64)
+        .unwrap_or_else(|| fs::metadata(db).map(|m| m.len()).unwrap_or(0))
 }
 
 fn status_of(rt: &AppRuntimeState, current: &CurrentLeInner) -> StorageStatus {
@@ -110,23 +119,26 @@ mod tests {
     use super::*;
 
     #[test]
-    fn size_includes_wal_and_tolerates_missing_files() {
+    fn size_is_page_count_times_page_size_and_tolerates_missing_file() {
         let dir = std::env::temp_dir().join(format!("storage_test_{}", std::process::id()));
         fs::create_dir_all(&dir).unwrap();
         let db = dir.join("1784_2026.db");
 
-        // 文件都不存在：0，不报错
+        // 文件不存在：0，不报错，也不会凭空建出文件
         assert_eq!(db_bytes(&db), 0);
+        assert!(!db.exists());
 
-        // 只有主文件
-        fs::write(&db, vec![0u8; 100]).unwrap();
-        assert_eq!(db_bytes(&db), 100);
+        let c = Connection::open(&db).unwrap();
+        c.execute_batch("PRAGMA journal_mode = WAL; CREATE TABLE t(x BLOB); INSERT INTO t VALUES (zeroblob(100000));")
+            .unwrap();
+        let expect: i64 = c
+            .query_row("SELECT page_count * page_size FROM pragma_page_count, pragma_page_size", [], |r| r.get(0))
+            .unwrap();
+        // 数据还在 WAL 里、主文件几乎是空的，也要算进去
+        assert_eq!(db_bytes(&db), expect as u64);
+        assert!(db_bytes(&db) > 100_000);
 
-        // 有 WAL：两者相加；-shm 不算
-        fs::write(dir.join("1784_2026.db-wal"), vec![0u8; 40]).unwrap();
-        fs::write(dir.join("1784_2026.db-shm"), vec![0u8; 999]).unwrap();
-        assert_eq!(db_bytes(&db), 140);
-
+        drop(c);
         let _ = fs::remove_dir_all(&dir);
     }
 }

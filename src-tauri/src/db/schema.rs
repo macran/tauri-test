@@ -15,6 +15,33 @@ CREATE TABLE IF NOT EXISTS sellers (
     tax_no  TEXT    NOT NULL UNIQUE,  -- 销方纳税人识别号，全局唯一
     name    TEXT    NOT NULL          -- 销方名称，可更新
 );
+-- 销方名称的全文索引（trigram：任意连续 3 个字符为一个词元，中间 / 后缀匹配都能走索引）。
+-- 销方去重后数量很少，名称只在这里存一份；发票头按 seller_id 关联过去，不再给每张发票重复存名称。
+-- 查询约定见 query/repository.rs 的 text_search：关键词 ≥ 3 个字符走本表，1~2 个字符回退 LIKE。
+-- contentless_delete=1 的表不能只更新部分列，所以 UPDATE 触发器「先删后插」。
+CREATE VIRTUAL TABLE IF NOT EXISTS sellers_fts USING fts5(
+    name,
+    content='',
+    contentless_delete=1,
+    tokenize='trigram'
+);
+CREATE TRIGGER IF NOT EXISTS sellers_ai
+AFTER INSERT ON sellers
+BEGIN
+    INSERT INTO sellers_fts(rowid, name) VALUES (NEW.id, NEW.name);
+END;
+CREATE TRIGGER IF NOT EXISTS sellers_au
+AFTER UPDATE OF name ON sellers
+WHEN OLD.name IS NOT NEW.name
+BEGIN
+    DELETE FROM sellers_fts WHERE rowid = NEW.id;
+    INSERT INTO sellers_fts(rowid, name) VALUES (NEW.id, NEW.name);
+END;
+CREATE TRIGGER IF NOT EXISTS sellers_ad
+AFTER DELETE ON sellers
+BEGIN
+    DELETE FROM sellers_fts WHERE rowid = OLD.id;
+END;
 ";
 
 // ─────────────────────────────────────────────────────────────
@@ -57,70 +84,38 @@ CREATE TABLE IF NOT EXISTS invoice_headers (
     UNIQUE(inv_unq_key),
     FOREIGN KEY (seller_id) REFERENCES sellers(id)
 );
--- 销方名称 / 备注的全文索引，trigram 分词：任意连续 3 个字符为一个词元，所以「中间匹配 / 后缀匹配」都能走索引。
--- 查询约定（见 query/repository.rs 的 Where::fts）：关键词 ≥ 3 个字符走本表，1~2 个字符 trigram 搜不到，回退 LIKE。
+-- 发票备注的全文索引（trigram，中间 / 后缀匹配都能走索引）。销方名称的索引在 sellers_fts（见 CREATE_SELLERS）。
+-- 查询约定见 query/repository.rs 的 text_search：关键词 ≥ 3 个字符走索引，1~2 个字符回退 LIKE。
 -- 不用 jieba：实测它比 LIKE 慢 5~6 倍，且 jieba_query 会把词展开成 OR 组合，命中数偏多。
--- 收益主要在「命中很少的精确查找」（50 万行 1ms vs LIKE 全表扫描 ~150ms）；命中几万行时耗时主要在取回整行，差别不大。
--- contentless_delete=1 的表不能只更新部分列，所以下面的 UPDATE 触发器一律「先删后插」。
+-- 备注为空的发票不写索引行（触发器的 WHEN 条件）。
+-- contentless_delete=1 的表不能只更新部分列，所以 UPDATE 触发器「先删后插」。
 CREATE VIRTUAL TABLE IF NOT EXISTS invoice_headers_fts USING fts5(
-    seller_name,
     remark,
     content='',
     contentless_delete=1,
     tokenize='trigram'
 );
--- 查询示例：select rowid from invoice_headers_fts where seller_name match <把关键词整体包成短语> limit 10;
--- INSERT 触发器保持不变（拼写修正：Iinvoice → invoice）
 CREATE TRIGGER IF NOT EXISTS invoice_headers_ai
 AFTER INSERT ON invoice_headers
+WHEN NEW.remark IS NOT NULL AND NEW.remark <> ''
 BEGIN
-    INSERT INTO invoice_headers_fts(
-        rowid,
-        seller_name,
-        remark
-    )
-    SELECT
-        NEW.id,
-        s.name,
-        COALESCE(NEW.remark, '')
-    FROM sellers AS s
-    WHERE s.id = NEW.seller_id;
+    INSERT INTO invoice_headers_fts(rowid, remark) VALUES (NEW.id, NEW.remark);
 END;
 
--- UPDATE 触发器：只监听 seller_id 变化（inv_unq_key 是生成列不可直接改）
 CREATE TRIGGER IF NOT EXISTS invoice_headers_au
-AFTER UPDATE OF seller_id, remark ON invoice_headers
-WHEN OLD.seller_id IS NOT NEW.seller_id
-   OR OLD.remark IS NOT NEW.remark
+AFTER UPDATE OF remark ON invoice_headers
+WHEN OLD.remark IS NOT NEW.remark
 BEGIN
     DELETE FROM invoice_headers_fts WHERE rowid = NEW.id;
-    INSERT INTO invoice_headers_fts(rowid, seller_name, remark)
-    SELECT NEW.id, s.name, COALESCE(NEW.remark, '')
-    FROM sellers AS s
-    WHERE s.id = NEW.seller_id;
+    INSERT INTO invoice_headers_fts(rowid, remark)
+    SELECT NEW.id, NEW.remark WHERE NEW.remark IS NOT NULL AND NEW.remark <> '';
 END;
 
--- DELETE 触发器保持不变
 CREATE TRIGGER IF NOT EXISTS invoice_headers_ad
 AFTER DELETE ON invoice_headers
 BEGIN
-    DELETE FROM invoice_headers_fts
-    WHERE rowid = OLD.id;
+    DELETE FROM invoice_headers_fts WHERE rowid = OLD.id;
 END;
-
--- sellers UPDATE 触发器保持不变
-CREATE TRIGGER IF NOT EXISTS sellers_au
-AFTER UPDATE OF name ON sellers
-WHEN OLD.name IS NOT NEW.name
-BEGIN
-    DELETE FROM invoice_headers_fts
-    WHERE rowid IN (SELECT h.id FROM invoice_headers AS h WHERE h.seller_id = NEW.id);
-    INSERT INTO invoice_headers_fts(rowid, seller_name, remark)
-    SELECT h.id, NEW.name, COALESCE(h.remark, '')
-    FROM invoice_headers AS h
-    WHERE h.seller_id = NEW.id;
-END;
-
 
 CREATE INDEX IF NOT EXISTS idx_invoice_headers_seller_id
     ON invoice_headers(seller_id);
@@ -1036,11 +1031,10 @@ pub fn init_db(conn: &mut Connection) -> SqlResult<()> {
     // 提升写入性能
     //conn.execute_batch("PRAGMA synchronous = NORMAL;")?;
 
-    // 建表（顺序不能换：sellers 必须先于 invoice_headers）
-    conn.execute_batch(CREATE_SELLERS)?;
+    // 开发阶段不做迁移：旧结构的 FTS（simple 分词，或销方名称还存在发票头索引里）直接丢弃，下面按新语句重建并回填。
+    // 必须在建 sellers 之前丢：旧的 sellers_au 触发器同名，IF NOT EXISTS 会把旧触发器留下。
     let rebuild_fts = fts_needs_rebuild(conn)?;
     if rebuild_fts {
-        // 开发阶段不做迁移：旧的 simple 分词索引直接丢弃，下面按新语句重建并回填
         conn.execute_batch(
             "DROP TRIGGER IF EXISTS invoice_headers_ai;
              DROP TRIGGER IF EXISTS invoice_headers_au;
@@ -1049,12 +1043,14 @@ pub fn init_db(conn: &mut Connection) -> SqlResult<()> {
              DROP TABLE IF EXISTS invoice_headers_fts;",
         )?;
     }
+    // 建表（顺序不能换：sellers 必须先于 invoice_headers）
+    conn.execute_batch(CREATE_SELLERS)?;
     conn.execute_batch(CREATE_INVOICE_HEADERS)?;
     if rebuild_fts {
         conn.execute_batch(
-            "INSERT INTO invoice_headers_fts(rowid, seller_name, remark)
-             SELECT h.id, s.name, COALESCE(h.remark, '')
-             FROM invoice_headers AS h JOIN sellers AS s ON s.id = h.seller_id;",
+            "INSERT INTO sellers_fts(rowid, name) SELECT id, name FROM sellers;
+             INSERT INTO invoice_headers_fts(rowid, remark)
+             SELECT id, remark FROM invoice_headers WHERE remark IS NOT NULL AND remark <> '';",
         )?;
     }
     conn.execute_batch(CREATE_INVOICE_DETAILS)?;
@@ -1090,7 +1086,7 @@ pub fn init_db(conn: &mut Connection) -> SqlResult<()> {
     Ok(())
 }
 
-/// invoice_headers_fts 已存在、但不是 trigram 分词（旧版用的 simple）时需要重建。
+/// invoice_headers_fts 已存在、但不是新结构（非 trigram，或还带 seller_name 列）时需要重建。
 /// 表还不存在时返回 false：随后的建表语句会直接建出新结构，无需回填。
 pub(crate) fn fts_needs_rebuild(conn: &Connection) -> SqlResult<bool> {
     let sql: Option<String> = conn
@@ -1100,7 +1096,7 @@ pub(crate) fn fts_needs_rebuild(conn: &Connection) -> SqlResult<bool> {
             |row| row.get(0),
         )
         .ok();
-    Ok(sql.is_some_and(|s| !s.contains("trigram")))
+    Ok(sql.is_some_and(|s| !s.contains("trigram") || s.contains("seller_name")))
 }
 
 /// 开发阶段：旧版按 tax_period 存储的进项转出 / 印花税匹配结果、人工结论和月结、确认记录

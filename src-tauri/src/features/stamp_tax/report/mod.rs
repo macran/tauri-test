@@ -281,7 +281,25 @@ fn push_row(out: &mut String, row: u32, values: &HashMap<&str, CellValue>) {
         r#"<row r="{row}" s="29" customFormat="1" ht="18" customHeight="1" spans="1:27">"#
     ));
     for (col, style) in ROW_STYLES {
-        cell_xml(out, &format!("{col}{row}"), style, values.get(col));
+        // O/P 保持模板公式，传入的数值仅作缓存值
+        let formula = match col {
+            "O" => Some(format!(
+                r#"IF(G{row}<>"",IF(G{row}="101110200|产权转移书据",VLOOKUP(H{row},代码表!$J$1:$L$9,3,FALSE),VLOOKUP(G{row},代码表!$C$2:$D$15,2,FALSE)),"")"#
+            )),
+            "P" => Some(format!(r#"IF(G{row}&O{row}<>"",L{row}*O{row},"")"#)),
+            _ => None,
+        };
+        let cell = match (formula, values.get(col)) {
+            (Some(f), cached) => Some(CellValue::Formula {
+                f,
+                cached: match cached {
+                    Some(CellValue::Number(v)) => v.clone(),
+                    _ => String::new(),
+                },
+            }),
+            (None, _) => None,
+        };
+        cell_xml(out, &format!("{col}{row}"), style, cell.as_ref().or(values.get(col)));
     }
     out.push_str("</row>");
 }

@@ -1,0 +1,31 @@
+name: Release CI
+on:
+ push:
+   tags:
+     - 'v*' # 触发条件：推送符合 v* 格式的标签
+jobs:
+ build-and-release:
+   runs-on: ${{ matrix.platform }}
+   strategy:
+     matrix:
+       platform: [macos-latest, ubuntu-latest, windows-latest]
+   steps:
+     - uses: actions/checkout@v4
+     - name: Setup Node.js
+       uses: actions/setup-node@v4
+       with:
+         node-version: lts/*
+     - name: Install Rust
+       uses: dtolnay/rust-toolchain@stable
+     - name: Install Dependencies
+       run: npm install # 根据需要替换为 npm 或 pnpm
+     - name: Build and Release
+       uses: tauri-apps/tauri-action@v0
+       env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       with:
+         tagName: app-v__VERSION__
+         releaseName: 'App v__VERSION__'
+         releaseBody: 'See the assets to download this version and install.'
+         releaseDraft: true
+         prerelease: false

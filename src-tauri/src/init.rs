@@ -277,9 +277,8 @@ pub fn ensure_le_database(app: &AppHandle, local_root: &Path, le: &str) -> AppRe
 
     let is_january = Local::now().month() == 1;
     let is_previous_year = latest_year < year;
-    let is_too_large = std::fs::metadata(&latest_path)
-        .map(|metadata| metadata.len() >= DB_SIZE_LIMIT_BYTES)
-        .unwrap_or(false);
+    // 与标题栏容量电池同一口径（页数 × 页大小）
+    let is_too_large = crate::commands::storage::db_bytes(&latest_path) >= DB_SIZE_LIMIT_BYTES;
 
     if is_january && is_previous_year && is_too_large {
         let new_path = local_root.join(format!("{le}_{year}.db"));

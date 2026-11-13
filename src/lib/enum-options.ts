@@ -40,9 +40,8 @@ export const IS_POSITIVE_OPTIONS: EnumOption[] = [
 
 export const RISK_LEVEL_OPTIONS: EnumOption[] = [
   { value: 1, label: "正常" },
-  { value: 2, label: "疑点" },
-  { value: 3, label: "风险" },
-  { value: 4, label: "高危" },
+  { value: 2, label: "疑点发票" },
+  { value: 3, label: "异常凭证" },
 ];
 
 export const INV_SOURCE_OPTIONS: EnumOption[] = [

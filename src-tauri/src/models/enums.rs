@@ -123,14 +123,13 @@ pub enum RiskLevel {
     #[strum(serialize = "正常")]
     Normal = 1,
 
-    #[strum(serialize = "疑点")]
+    #[strum(serialize = "疑点发票")]
     Suspicious = 2,
 
-    #[strum(serialize = "风险")]
+    #[strum(serialize = "异常凭证")]
     Abnormal = 3,
 
-    #[strum(serialize = "高危")]
-    HighRisk = 4,
+
 }
 
 //认证清单中的风险状态
